@@ -1585,6 +1585,9 @@ MonoBehaviour:
   Sensitivity: 2
   RotationSpeed: 175
   DamageVignetteDuration: 2
+  IgnoreMask:
+    serializedVersion: 2
+    m_Bits: 0
   HealthBar: {fileID: 7109620018218045665}
   RedColor: {r: 4.628273, g: 0.3811519, b: 0.3811519, a: 0}
   BlueColor: {r: 0.3811519, g: 0.5808029, b: 3.4666674, a: 0}
@@ -1594,7 +1597,7 @@ MonoBehaviour:
   MinigunPoint: {fileID: 775280564345229928}
   Cursor: {fileID: 3549168964617360028}
   MinigunDamage: 10
-  MinigunRate: 10
+  MinigunRate: 0.05
   Team: 0
   Sid: 
   IsShooting: 0

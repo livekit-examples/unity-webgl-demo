@@ -53,7 +53,7 @@ public class Player : NetworkBehaviour
     public GameObject MinigunPoint;
     public GameObject Cursor;
     public int MinigunDamage = 10;
-    public int MinigunRate = 10; // Amount of fire / s
+    public float MinigunRate = 1/10f;
 
     // Synced variables
     [HideInInspector] [SyncVar] public Team Team;
@@ -66,6 +66,7 @@ public class Player : NetworkBehaviour
     private Vector2 m_Rotation;
     private Vector3 m_Velocity;
     private Coroutine m_VignetteRoutine;
+    private float m_LastFire;
 
     public Participant Participant { get; private set; } // LiveKit instance
     
@@ -139,72 +140,89 @@ public class Player : NetworkBehaviour
             CmdUpdateShooting(true);
         else if (!fire && IsShooting)
             CmdUpdateShooting(false);
+        
+        IsShooting = fire;
     }
 
     void FixedUpdate()
     {
-        if (IsShooting)
-        {
-            var startDir = MinigunPoint.transform.position;
-            var dir = Cursor.transform.position - startDir;
+        UpdateMinigun();
+        UpdateMovement();
+    }
 
+    void UpdateMinigun()
+    {
+        if (!IsShooting) 
+            return;
+
+        var startDir = MinigunPoint.transform.position;
+        var dir = Cursor.transform.position - startDir;
+
+        while (Time.time - m_LastFire >= MinigunRate)
+        {
+            m_LastFire += MinigunRate;
+            
             var epsilon = 0.01f;
             dir += new Vector3(Random.Range(-epsilon, epsilon), Random.Range(-epsilon, epsilon),
                 Random.Range(-epsilon, epsilon));
 
-            if (Physics.Raycast(startDir, dir, out RaycastHit hit))
-            {
-                StartCoroutine(ShootEffect(startDir, hit));
+            if (!Physics.Raycast(startDir, dir, out RaycastHit hit)) 
+                return;
+        
+            StartCoroutine(ShootEffect(startDir, hit));
 
-                if (isServer)
+            // Apply damage
+            if (isServer)
+            {
+                var rPlayer = hit.transform.GetComponent<Player>();
+                if (rPlayer == null || rPlayer.Team == Team)
+                    return;
+            
+                rPlayer.Health -= MinigunDamage;
+                if (rPlayer.Health <= 0)
                 {
-                    var rPlayer = hit.transform.GetComponent<Player>();
-                    if (rPlayer != null && rPlayer.Team != Team)
-                    {
-                        rPlayer.Health -= MinigunDamage;
-                        if (rPlayer.Health <= 0)
-                        {
-                            var rTransform = rPlayer.transform;
-                            RpcExplode(rTransform.position + Vector3.up * 1.5f, rTransform.rotation);
-                            NetworkServer.Destroy(rPlayer.gameObject);
-                            GameManager.Instance.AddSpectator(rPlayer.connectionToClient);
-                        }
-                    }
+                    var rTransform = rPlayer.transform;
+                    RpcExplode(rTransform.position, rTransform.rotation);
+                    NetworkServer.Destroy(rPlayer.gameObject);
+                    GameManager.Instance.AddSpectator(rPlayer.connectionToClient);
                 }
             }
         }
+    }
 
-        if (isLocalPlayer)
+    void UpdateMovement()
+    {
+        if (!isLocalPlayer) 
+            return;
+        
+        var moving = m_Vertical != 0;
+        var rotating = m_Horizontal != 0;
+
+        Animator.SetFloat(MovingSpeedAnim, m_Vertical * Speed / 5);
+        Animator.SetBool(MoveStateAnim, moving);
+        Animator.SetBool(RotateStateAnim, false);
+
+        m_Controller.Move(Mesh.transform.right * m_Vertical * Speed * Time.deltaTime);
+
+        if (rotating)
         {
-            var moving = m_Vertical != 0;
-            var rotating = m_Horizontal != 0;
+            Mesh.transform.localRotation =
+                Quaternion.AngleAxis(RotationSpeed * m_Horizontal * Time.deltaTime, Vector3.up)
+                * Mesh.transform.localRotation;
 
-            Animator.SetFloat(MovingSpeedAnim, m_Vertical * Speed / 5);
-            Animator.SetBool(MoveStateAnim, moving);
-            Animator.SetBool(RotateStateAnim, false);
-
-            m_Controller.Move(Mesh.transform.right * m_Vertical * Speed * Time.deltaTime);
-
-            if (rotating)
+            if (!moving)
             {
-                Mesh.transform.localRotation =
-                    Quaternion.AngleAxis(RotationSpeed * m_Horizontal * Time.deltaTime, Vector3.up)
-                    * Mesh.transform.localRotation;
-
-                if (!moving)
-                {
-                    Animator.SetFloat(RotatingSpeedAnim, m_Horizontal);
-                    Animator.SetBool(RotateStateAnim, true);
-                }
+                Animator.SetFloat(RotatingSpeedAnim, m_Horizontal);
+                Animator.SetBool(RotateStateAnim, true);
             }
-
-            // Gravity 
-            if (m_Controller.isGrounded && m_Velocity.y < 0)
-                m_Velocity.y = 0f;
-
-            m_Velocity.y += Gravity;
-            m_Controller.Move(m_Velocity * Time.deltaTime * Time.deltaTime / 2f);
         }
+
+        // Gravity 
+        if (m_Controller.isGrounded && m_Velocity.y < 0)
+            m_Velocity.y = 0f;
+
+        m_Velocity.y += Gravity;
+        m_Controller.Move(m_Velocity * Time.deltaTime * Time.deltaTime / 2f);
     }
 
     void LateUpdate()
@@ -287,6 +305,7 @@ public class Player : NetworkBehaviour
     [Command]
     void CmdUpdateShooting(bool status)
     {
+        m_LastFire = Time.time;
         IsShooting = status;
     }
 
