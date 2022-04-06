@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package unity_protocol;
+option go_package = "github.com/livekit/client-unity-demo/Protocol~/unity_proto";
+
+service UnityService{
+    rpc RequestJoinToken(JoinTokenRequest) returns (JoinTokenResponse);
+}
+
+message JoinTokenRequest {
+    string room_name = 1;
+    string participant_name = 2;
+    bool host = 3;
+}
+
+message JoinTokenResponse{
+    string join_token = 1;
+}
+
+message ParticipantMetadata{
+    bool isHost = 1;
+}

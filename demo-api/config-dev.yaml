@@ -1,0 +1,7 @@
+development: true
+log_level: info
+
+livekit:
+  host: http://localhost:7880
+  api_key: APICkHm83MhghPx
+  secret_key: bp15wuTgKKK2kmlf9F79bxSRlwjtrH2xggaejlzZaJX

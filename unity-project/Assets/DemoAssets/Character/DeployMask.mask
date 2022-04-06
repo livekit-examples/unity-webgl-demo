@@ -1,0 +1,315 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: DeployMask
+  m_Mask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: Armature
+    m_Weight: 0
+  - m_Path: Armature/Root
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_1
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_1/chain_track_left_1_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_2
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_2/chain_track_left_2_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_3
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_3/chain_track_left_3_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_4
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_4/chain_track_left_4_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_5
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_5/chain_track_left_5_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_6
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_6/chain_track_left_6_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_7
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_7/chain_track_left_7_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_8
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_8/chain_track_left_8_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_9
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_9/chain_track_left_9_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_10
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_10/chain_track_left_10_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_11
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_11/chain_track_left_11_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_12
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_12/chain_track_left_12_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_13
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_13/chain_track_left_13_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_14
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_14/chain_track_left_14_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_15
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_15/chain_track_left_15_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_16
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_16/chain_track_left_16_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_17
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_17/chain_track_left_17_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_18
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_18/chain_track_left_18_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_19
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_19/chain_track_left_19_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_20
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_20/chain_track_left_20_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_21
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_21/chain_track_left_21_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_22
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_22/chain_track_left_22_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_23
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_23/chain_track_left_23_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_24
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_24/chain_track_left_24_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_25
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_25/chain_track_left_25_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_26
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_26/chain_track_left_26_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_27
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_left_27/chain_track_left_27_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_1
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_1/chain_track_right_1_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_2
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_2/chain_track_right_2_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_3
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_3/chain_track_right_3_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_4
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_4/chain_track_right_4_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_5
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_5/chain_track_right_5_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_6
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_6/chain_track_right_6_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_7
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_7/chain_track_right_7_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_8
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_8/chain_track_right_8_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_9
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_9/chain_track_right_9_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_10
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_10/chain_track_right_10_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_11
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_11/chain_track_right_11_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_12
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_12/chain_track_right_12_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_13
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_13/chain_track_right_13_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_14
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_14/chain_track_right_14_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_15
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_15/chain_track_right_15_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_16
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_16/chain_track_right_16_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_17
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_17/chain_track_right_17_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_18
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_18/chain_track_right_18_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_19
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_19/chain_track_right_19_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_20
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_20/chain_track_right_20_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_21
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_21/chain_track_right_21_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_22
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_22/chain_track_right_22_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_23
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_23/chain_track_right_23_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_24
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_24/chain_track_right_24_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_25
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_25/chain_track_right_25_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_26
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_26/chain_track_right_26_end
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_27
+    m_Weight: 0
+  - m_Path: Armature/Root/chain_track_right_27/chain_track_right_27_end
+    m_Weight: 0
+  - m_Path: Armature/Root/door_left
+    m_Weight: 1
+  - m_Path: Armature/Root/door_left/door_left_end
+    m_Weight: 1
+  - m_Path: Armature/Root/door_right
+    m_Weight: 1
+  - m_Path: Armature/Root/door_right/door_right_end
+    m_Weight: 1
+  - m_Path: Armature/Root/pump_root
+    m_Weight: 1
+  - m_Path: Armature/Root/pump_root/pump_middle
+    m_Weight: 1
+  - m_Path: Armature/Root/pump_root/pump_middle/pump_up
+    m_Weight: 1
+  - m_Path: Armature/Root/pump_root/pump_middle/pump_up/head
+    m_Weight: 1
+  - m_Path: Armature/Root/pump_root/pump_middle/pump_up/head/head_end
+    m_Weight: 1
+  - m_Path: Armature/Root/rot_luncher
+    m_Weight: 0
+  - m_Path: Armature/Root/rot_luncher/rot_luncher_end
+    m_Weight: 0
+  - m_Path: Armature/Root/rot_minigun
+    m_Weight: 0
+  - m_Path: Armature/Root/rot_minigun/rot_minigun2
+    m_Weight: 0
+  - m_Path: Armature/Root/rot_minigun/rot_minigun2/fire_minigun
+    m_Weight: 0
+  - m_Path: Armature/Root/rot_minigun/rot_minigun2/fire_minigun/fire_minigun_end
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_left_big
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_left_big/wheel_left_big_end
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_left_little
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_left_little/wheel_left_little_end
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_left_little2
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_left_little2/wheel_left_little2_end
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_left_middle
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_left_middle/wheel_left_middle_end
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_right_big
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_right_big/wheel_right_big_end
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_right_little
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_right_little/wheel_right_little_end
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_right_little2
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_right_little2/wheel_right_little2_end
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_right_middle
+    m_Weight: 0
+  - m_Path: Armature/Root/wheel_right_middle/wheel_right_middle_end
+    m_Weight: 0
+  - m_Path: chaine.005
+    m_Weight: 0
+  - m_Path: chaine.017
+    m_Weight: 0
+  - m_Path: corp.002
+    m_Weight: 0
+  - m_Path: Cube
+    m_Weight: 0
+  - m_Path: Cube.001
+    m_Weight: 0
+  - m_Path: Cylinder
+    m_Weight: 0
+  - m_Path: door
+    m_Weight: 0
+  - m_Path: door.001
+    m_Weight: 0
+  - m_Path: minigun
+    m_Weight: 0
+  - m_Path: rouage
+    m_Weight: 0
