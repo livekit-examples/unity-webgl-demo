@@ -1,4 +1,3 @@
-using System;
 using Mirror;
 using UnityEngine;
 
@@ -23,6 +22,7 @@ public class Spectator : NetworkBehaviour
         if (player == null)
             return;
         
-        player.SetCamera(true);
+        Debug.Log($"Spectating {player}");
+        GameManager.Instance.SetCameraStatus(player.Camera, true);
     }
 }

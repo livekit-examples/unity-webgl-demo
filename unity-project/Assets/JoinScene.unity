@@ -2549,6 +2549,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   SpectatorPrefab: {fileID: 1402178907006285715, guid: 5c3ba5178a92f4cb694c491c91989a87, type: 3}
+  ActiveCamera: {fileID: 0}
 --- !u!114 &1970854809
 MonoBehaviour:
   m_ObjectHideFlags: 0

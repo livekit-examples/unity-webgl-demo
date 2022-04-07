@@ -24,9 +24,6 @@ public class Player : NetworkBehaviour
     public static Dictionary<string, Player> Players = new Dictionary<string, Player>();
     public static Player LocalPlayer { get; private set; }
 
-    public delegate void PlayerAddedDelegate(Player player);
-    public static event PlayerAddedDelegate PlayerAdded;
-
     // Properties
     public Light SpeakingLight;
     public PlayerExplosion PlayerExplosion;
@@ -82,6 +79,13 @@ public class Player : NetworkBehaviour
 #else
         Sid = GUID.Generate().ToString();
 #endif
+
+        Players[Sid] = this;
+    }
+    
+    public override void OnStartClient()
+    {
+        Players[Sid] = this;
     }
     
     void Start()
@@ -95,7 +99,7 @@ public class Player : NetworkBehaviour
         }
         
         if(Spectator.LocalSpectator == null)
-            SetCamera(isLocalPlayer); // Don't change the spectator behavior 
+            GameManager.Instance.SetCameraStatus(Camera, isLocalPlayer);
         
         Projection.SetColor(Team == Team.Red ? RedColor : BlueColor);
 
@@ -122,8 +126,6 @@ public class Player : NetworkBehaviour
         }
 #endif
         
-        Players.Add(Sid, this);
-        PlayerAdded?.Invoke(this);
     }
 
     void Update()
@@ -140,8 +142,6 @@ public class Player : NetworkBehaviour
             CmdUpdateShooting(true);
         else if (!fire && IsShooting)
             CmdUpdateShooting(false);
-        
-        IsShooting = fire;
     }
 
     void FixedUpdate()
@@ -152,8 +152,11 @@ public class Player : NetworkBehaviour
 
     void UpdateMinigun()
     {
-        if (!IsShooting) 
+        if (!IsShooting)
+        {
+            m_LastFire = Time.time;
             return;
+        }
 
         var startDir = MinigunPoint.transform.position;
         var dir = Cursor.transform.position - startDir;
@@ -184,7 +187,7 @@ public class Player : NetworkBehaviour
                     var rTransform = rPlayer.transform;
                     RpcExplode(rTransform.position, rTransform.rotation);
                     NetworkServer.Destroy(rPlayer.gameObject);
-                    GameManager.Instance.AddSpectator(rPlayer.connectionToClient);
+                    GameManager.Instance.ToSpectator(rPlayer.connectionToClient);
                 }
             }
         }
@@ -254,22 +257,8 @@ public class Player : NetworkBehaviour
         i.Play();
     }
 
-    public void SetCamera(bool status)
-    {
-        Camera.enabled = status;
-        Camera.GetComponent<PostProcessLayer>().enabled = status;
-        Camera.GetComponent<PostProcessVolume>().enabled = status;
-
-        if (status)
-            Camera.gameObject.AddComponent<AudioListener>();
-        else
-            Destroy(Camera.GetComponent<AudioListener>());
-    }
-
     void OnDestroy()
     {
-        Players.Remove(Sid);
-        
         if(isServer)
             GameManager.Instance.UpdateScore(5f);
         
@@ -284,7 +273,17 @@ public class Player : NetworkBehaviour
     {
         Instantiate(PlayerExplosion, pos, rot);
     }
-    
+
+    public override void OnStopClient()
+    {
+        Players.Remove(Sid);
+    }
+
+    public override void OnStopServer()
+    {
+        Players.Remove(Sid);
+    }
+
     /*
      * Hooks
      */
@@ -305,7 +304,6 @@ public class Player : NetworkBehaviour
     [Command]
     void CmdUpdateShooting(bool status)
     {
-        m_LastFire = Time.time;
         IsShooting = status;
     }
 

@@ -18,7 +18,7 @@ public class HealthBar : MonoBehaviour
             Destroy(gameObject);
 
         m_RedSpeed = Player.MaxHealth / 8f;
-        Red.fillAmount = 1;
+        Red.fillAmount = 1f;
     }
 
     void Update()
@@ -29,9 +29,10 @@ public class HealthBar : MonoBehaviour
         if (Red.fillAmount > Blue.fillAmount)
             Red.fillAmount = Mathf.Max(0, Red.fillAmount - m_RedSpeed / Player.MaxHealth * Time.deltaTime);
 
-        if (Camera.current != null)
+        var cam = GameManager.Instance.ActiveCamera;
+        if (cam != null)
         {
-            transform.LookAt(Camera.current.transform.position);
+            transform.LookAt(cam.transform.position);
             transform.rotation = Quaternion.AngleAxis(180, Vector3.up) * transform.rotation;            
         }
     }
