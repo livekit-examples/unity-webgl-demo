@@ -1571,7 +1571,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.1
+  syncInterval: 0.06666667
   SpeakingLight: {fileID: 3825538499023737385}
   PlayerExplosion: {fileID: 7510512910580494968, guid: 6a58e8812a97e4af3916f19f6269aa04, type: 3}
   Projection: {fileID: 6565405464527672995}
@@ -1593,8 +1593,8 @@ MonoBehaviour:
   BulletTracer: {fileID: 9215109327515060660, guid: 2b3225add76f44b749ed1d7b9e0e8f24, type: 3}
   MinigunPoint: {fileID: 775280564345229928}
   Cursor: {fileID: 3549168964617360028}
-  MinigunDamage: 10
-  MinigunRate: 10
+  MinigunDamage: 25
+  MinigunRate: 0.05
   Team: 0
   Sid: 
   IsShooting: 0
@@ -3319,6 +3319,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3780829553575636081}
+  - {fileID: 7276955083338447577}
   m_Father: {fileID: 8635513183334464199}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3665,7 +3666,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 7.6e-44, y: 2.022e-42, z: 6e-44, w: 2.524355e-29}
+  m_BoundingSphereOverride: {x: 0, y: 2.05e-43, z: 0, w: 5.8288e-41}
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ShadowRadius: 0
@@ -3776,7 +3777,6 @@ Transform:
   - {fileID: 3152145416660751360}
   - {fileID: 4326045342000090548}
   - {fileID: 4637046152110076281}
-  - {fileID: 7276955083338447577}
   - {fileID: 4677178555356233961}
   - {fileID: 4150666610691024908}
   - {fileID: 4605357236683141600}
@@ -4828,6 +4828,7 @@ GameObject:
   - component: {fileID: 5776089926854974913}
   - component: {fileID: 5776089926854974915}
   - component: {fileID: 5776089926854974914}
+  - component: {fileID: 757054698953043451}
   m_Layer: 6
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -4857,7 +4858,7 @@ Camera:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5776089926854974916}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
@@ -4970,6 +4971,14 @@ MonoBehaviour:
   blendDistance: 0
   weight: 1
   priority: 0
+--- !u!124 &757054698953043451
+Behaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5776089926854974916}
+  m_Enabled: 1
 --- !u!1 &5891433609978706127
 GameObject:
   m_ObjectHideFlags: 0
@@ -6530,12 +6539,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8049938848600039523}
-  m_LocalRotation: {x: -0.5, y: 0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: 0, y: 4.3539996, z: 0}
-  m_LocalScale: {x: 1.4999998, y: 1.4999995, z: 1.4999998}
+  m_LocalRotation: {x: -0.49999994, y: 0.50000006, z: 0.50000006, w: 0.49999994}
+  m_LocalPosition: {x: -0.005890005, y: -0.0034099892, z: 0.000000009778934}
+  m_LocalScale: {x: 0.015000001, y: 0.014999995, z: 0.015000003}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 3615536150369245995}
+  m_Father: {fileID: 879761842529945183}
   m_RootOrder: -1
   m_LocalEulerAnglesHint: {x: -90, y: 90, z: 0}
 --- !u!33 &6004190568292513148

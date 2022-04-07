@@ -2,6 +2,7 @@ using System.Collections;
 using System.Linq;
 using Mirror;
 using UnityEngine;
+using UnityEngine.Rendering.PostProcessing;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,6 +11,7 @@ public class GameManager : MonoBehaviour
     
     private bool m_RoundRestarting;
     public Spectator SpectatorPrefab;
+    public Camera ActiveCamera;
 
     void Awake()
     {
@@ -86,17 +88,43 @@ public class GameManager : MonoBehaviour
         StartRound();
         m_RoundRestarting = false;
     }
-
-    public void AddSpectator(NetworkConnectionToClient client, bool specRandom = true)
+    
+    [Client]
+    public void SetCameraStatus(Camera camera, bool status)
     {
+        if (status)
+        {
+            var pCam = ActiveCamera;
+            ActiveCamera = null;
+        
+            if(pCam != null)
+                SetCameraStatus(pCam, false);
+            
+            ActiveCamera = camera;
+            camera.enabled = true;
+            camera.GetComponent<PostProcessLayer>().enabled = true;
+            camera.GetComponent<PostProcessVolume>().enabled = true;
+            camera.gameObject.AddComponent<AudioListener>();
+        }
+        else
+        {
+            camera.enabled = false;
+            camera.GetComponent<PostProcessLayer>().enabled = false;
+            camera.GetComponent<PostProcessVolume>().enabled = false;
+            Destroy(camera.GetComponent<AudioListener>());
+        }
+    }
+
+    [Server]
+    public void ToSpectator(NetworkConnectionToClient client, bool specRandom = true)
+    {
+        NetworkServer.RemovePlayerForConnection(client, true);
         var spec = Instantiate(SpectatorPrefab);
         NetworkServer.AddPlayerForConnection(client, spec.gameObject);
 
         if (specRandom)
         {
             var p = Player.Players.First();
-            
-            Debug.Log($"Starting specatate on {p}");
             spec.RpcSpectatePlayer(client, p.Value);
         }
     }

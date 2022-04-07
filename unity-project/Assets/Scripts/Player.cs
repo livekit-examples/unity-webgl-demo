@@ -24,9 +24,6 @@ public class Player : NetworkBehaviour
     public static Dictionary<string, Player> Players = new Dictionary<string, Player>();
     public static Player LocalPlayer { get; private set; }
 
-    public delegate void PlayerAddedDelegate(Player player);
-    public static event PlayerAddedDelegate PlayerAdded;
-
     // Properties
     public Light SpeakingLight;
     public PlayerExplosion PlayerExplosion;
@@ -53,7 +50,7 @@ public class Player : NetworkBehaviour
     public GameObject MinigunPoint;
     public GameObject Cursor;
     public int MinigunDamage = 10;
-    public int MinigunRate = 10; // Amount of fire / s
+    public float MinigunRate = 1/10f;
 
     // Synced variables
     [HideInInspector] [SyncVar] public Team Team;
@@ -66,6 +63,7 @@ public class Player : NetworkBehaviour
     private Vector2 m_Rotation;
     private Vector3 m_Velocity;
     private Coroutine m_VignetteRoutine;
+    private float m_LastFire;
 
     public Participant Participant { get; private set; } // LiveKit instance
     
@@ -81,6 +79,13 @@ public class Player : NetworkBehaviour
 #else
         Sid = GUID.Generate().ToString();
 #endif
+
+        Players[Sid] = this;
+    }
+    
+    public override void OnStartClient()
+    {
+        Players[Sid] = this;
     }
     
     void Start()
@@ -94,7 +99,7 @@ public class Player : NetworkBehaviour
         }
         
         if(Spectator.LocalSpectator == null)
-            SetCamera(isLocalPlayer); // Don't change the spectator behavior 
+            GameManager.Instance.SetCameraStatus(Camera, isLocalPlayer);
         
         Projection.SetColor(Team == Team.Red ? RedColor : BlueColor);
 
@@ -121,8 +126,6 @@ public class Player : NetworkBehaviour
         }
 #endif
         
-        Players.Add(Sid, this);
-        PlayerAdded?.Invoke(this);
     }
 
     void Update()
@@ -143,68 +146,86 @@ public class Player : NetworkBehaviour
 
     void FixedUpdate()
     {
-        if (IsShooting)
-        {
-            var startDir = MinigunPoint.transform.position;
-            var dir = Cursor.transform.position - startDir;
+        UpdateMinigun();
+        UpdateMovement();
+    }
 
+    void UpdateMinigun()
+    {
+        if (!IsShooting)
+        {
+            m_LastFire = Time.time;
+            return;
+        }
+
+        var startDir = MinigunPoint.transform.position;
+        var dir = Cursor.transform.position - startDir;
+
+        while (Time.time - m_LastFire >= MinigunRate)
+        {
+            m_LastFire += MinigunRate;
+            
             var epsilon = 0.01f;
             dir += new Vector3(Random.Range(-epsilon, epsilon), Random.Range(-epsilon, epsilon),
                 Random.Range(-epsilon, epsilon));
 
-            if (Physics.Raycast(startDir, dir, out RaycastHit hit))
-            {
-                StartCoroutine(ShootEffect(startDir, hit));
+            if (!Physics.Raycast(startDir, dir, out RaycastHit hit)) 
+                return;
+        
+            StartCoroutine(ShootEffect(startDir, hit));
 
-                if (isServer)
+            // Apply damage
+            if (isServer)
+            {
+                var rPlayer = hit.transform.GetComponent<Player>();
+                if (rPlayer == null || rPlayer.Team == Team)
+                    return;
+            
+                rPlayer.Health -= MinigunDamage;
+                if (rPlayer.Health <= 0)
                 {
-                    var rPlayer = hit.transform.GetComponent<Player>();
-                    if (rPlayer != null && rPlayer.Team != Team)
-                    {
-                        rPlayer.Health -= MinigunDamage;
-                        if (rPlayer.Health <= 0)
-                        {
-                            var rTransform = rPlayer.transform;
-                            RpcExplode(rTransform.position + Vector3.up * 1.5f, rTransform.rotation);
-                            NetworkServer.Destroy(rPlayer.gameObject);
-                            GameManager.Instance.AddSpectator(rPlayer.connectionToClient);
-                        }
-                    }
+                    var rTransform = rPlayer.transform;
+                    RpcExplode(rTransform.position, rTransform.rotation);
+                    NetworkServer.Destroy(rPlayer.gameObject);
+                    GameManager.Instance.ToSpectator(rPlayer.connectionToClient);
                 }
             }
         }
+    }
 
-        if (isLocalPlayer)
+    void UpdateMovement()
+    {
+        if (!isLocalPlayer) 
+            return;
+        
+        var moving = m_Vertical != 0;
+        var rotating = m_Horizontal != 0;
+
+        Animator.SetFloat(MovingSpeedAnim, m_Vertical * Speed / 5);
+        Animator.SetBool(MoveStateAnim, moving);
+        Animator.SetBool(RotateStateAnim, false);
+
+        m_Controller.Move(Mesh.transform.right * m_Vertical * Speed * Time.deltaTime);
+
+        if (rotating)
         {
-            var moving = m_Vertical != 0;
-            var rotating = m_Horizontal != 0;
+            Mesh.transform.localRotation =
+                Quaternion.AngleAxis(RotationSpeed * m_Horizontal * Time.deltaTime, Vector3.up)
+                * Mesh.transform.localRotation;
 
-            Animator.SetFloat(MovingSpeedAnim, m_Vertical * Speed / 5);
-            Animator.SetBool(MoveStateAnim, moving);
-            Animator.SetBool(RotateStateAnim, false);
-
-            m_Controller.Move(Mesh.transform.right * m_Vertical * Speed * Time.deltaTime);
-
-            if (rotating)
+            if (!moving)
             {
-                Mesh.transform.localRotation =
-                    Quaternion.AngleAxis(RotationSpeed * m_Horizontal * Time.deltaTime, Vector3.up)
-                    * Mesh.transform.localRotation;
-
-                if (!moving)
-                {
-                    Animator.SetFloat(RotatingSpeedAnim, m_Horizontal);
-                    Animator.SetBool(RotateStateAnim, true);
-                }
+                Animator.SetFloat(RotatingSpeedAnim, m_Horizontal);
+                Animator.SetBool(RotateStateAnim, true);
             }
-
-            // Gravity 
-            if (m_Controller.isGrounded && m_Velocity.y < 0)
-                m_Velocity.y = 0f;
-
-            m_Velocity.y += Gravity;
-            m_Controller.Move(m_Velocity * Time.deltaTime * Time.deltaTime / 2f);
         }
+
+        // Gravity 
+        if (m_Controller.isGrounded && m_Velocity.y < 0)
+            m_Velocity.y = 0f;
+
+        m_Velocity.y += Gravity;
+        m_Controller.Move(m_Velocity * Time.deltaTime * Time.deltaTime / 2f);
     }
 
     void LateUpdate()
@@ -236,22 +257,8 @@ public class Player : NetworkBehaviour
         i.Play();
     }
 
-    public void SetCamera(bool status)
-    {
-        Camera.enabled = status;
-        Camera.GetComponent<PostProcessLayer>().enabled = status;
-        Camera.GetComponent<PostProcessVolume>().enabled = status;
-
-        if (status)
-            Camera.gameObject.AddComponent<AudioListener>();
-        else
-            Destroy(Camera.GetComponent<AudioListener>());
-    }
-
     void OnDestroy()
     {
-        Players.Remove(Sid);
-        
         if(isServer)
             GameManager.Instance.UpdateScore(5f);
         
@@ -266,7 +273,17 @@ public class Player : NetworkBehaviour
     {
         Instantiate(PlayerExplosion, pos, rot);
     }
-    
+
+    public override void OnStopClient()
+    {
+        Players.Remove(Sid);
+    }
+
+    public override void OnStopServer()
+    {
+        Players.Remove(Sid);
+    }
+
     /*
      * Hooks
      */

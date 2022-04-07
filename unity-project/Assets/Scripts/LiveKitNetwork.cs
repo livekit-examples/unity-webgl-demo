@@ -69,7 +69,7 @@ public class LiveKitNetwork : NetworkManager
         if (Connections.Count <= 2)
             GameManager.Instance.StartRound();
         else
-            GameManager.Instance.AddSpectator(conn);
+            GameManager.Instance.ToSpectator(conn);
     }
     
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
@@ -128,9 +128,6 @@ public class LiveKitNetwork : NetworkManager
         var joinOp = Room.Connect(LiveKitURL, tokenOp.Resp.JoinToken, conOptions);
         yield return joinOp;
 
-
-        Debug.Log(joinOp);
-        Debug.Log(joinOp.IsError);
         if (joinOp.IsError)
         {
             Debug.Log("An error occurred while joining the room");
