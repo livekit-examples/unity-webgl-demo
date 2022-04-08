@@ -9889,8 +9889,9 @@ GameObject:
   - component: {fileID: 1820075230}
   - component: {fileID: 1820075232}
   - component: {fileID: 1820075231}
+  - component: {fileID: 1820075233}
   m_Layer: 0
-  m_Name: GameState
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9925,6 +9926,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  lastSyncTime: 0
+  <netIdentity>k__BackingField: {fileID: 0}
+  <ComponentIndex>k__BackingField: 0
+  <syncVarDirtyBits>k__BackingField: 0
+  syncObjectDirtyBits: 0
+  syncVarHookGuard: 0
   BlueText: {fileID: 1465269594}
   RedText: {fileID: 1884405566}
   RedWon: {fileID: 1517574157}
@@ -9949,6 +9956,29 @@ MonoBehaviour:
   visible: 2
   m_AssetId: 
   hasSpawned: 0
+--- !u!114 &1820075233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1820075229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28d8ea0d80e2fbf45adf51e8768926b9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  BlueText: {fileID: 1465269594}
+  RedText: {fileID: 1884405566}
+  RedWon: {fileID: 1517574157}
+  BlueWon: {fileID: 1149535525}
+  MicroImage: {fileID: 1305882207}
+  SpectatorPrefab: {fileID: 1402178907006285715, guid: 5c3ba5178a92f4cb694c491c91989a87, type: 3}
+  BlueScore: 0
+  RedScore: 0
+  ActiveCamera: {fileID: 0}
 --- !u!1 &1850100075
 GameObject:
   m_ObjectHideFlags: 0

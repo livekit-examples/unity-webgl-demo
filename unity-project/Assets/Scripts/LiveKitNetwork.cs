@@ -20,6 +20,8 @@ public class ClientConnection
 
 public class LiveKitNetwork : NetworkManager
 {
+    public static LiveKitNetwork Instance { get; private set; }
+
     public readonly Dictionary<int, ClientConnection> Connections = new Dictionary<int, ClientConnection>();
     
     [Header("LiveKit")]
@@ -32,6 +34,15 @@ public class LiveKitNetwork : NetworkManager
 
     public override void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(this);
+        
         base.Awake();
         UnityService = new UnityServiceClient(this, ServiceURL, 10);
         Transport = GetComponent<LiveKitTransport>();

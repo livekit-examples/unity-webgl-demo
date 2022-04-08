@@ -60,7 +60,7 @@ public class JoinMenu : MonoBehaviour
 #endif
         
         m_Connecting = true;
-        GameManager.Instance.StartCoroutine(JoinRoutine(username, room, host));
+        LiveKitNetwork.Instance.StartCoroutine(JoinRoutine(username, room, host));
     }
 
     void OnDestroy()
@@ -70,7 +70,7 @@ public class JoinMenu : MonoBehaviour
 
     IEnumerator JoinRoutine(string name, string room, bool host)
     {
-        yield return GameManager.Instance.LiveKitNetwork.JoinRoom(room, name, host);
+        yield return LiveKitNetwork.Instance.JoinRoom(room, name, host);
         m_Connecting = false;
     }
 }

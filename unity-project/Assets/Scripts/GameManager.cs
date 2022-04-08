@@ -1,17 +1,28 @@
 using System.Collections;
 using System.Linq;
 using Mirror;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
+using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
+public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance { get; private set; }
-    public LiveKitNetwork LiveKitNetwork { get; private set; }
+    
+    public TMP_Text BlueText;
+    public TMP_Text RedText;
+    public TMP_Text RedWon;
+    public TMP_Text BlueWon;
+    public Image MicroImage;
+    public Spectator SpectatorPrefab;
+
+    [SyncVar(hook=nameof(OnBlueScoreChanged))] [HideInInspector] public int BlueScore;
+    [SyncVar(hook=nameof(OnRedScoreChanged))] [HideInInspector] public int RedScore;
     
     private bool m_RoundRestarting;
-    public Spectator SpectatorPrefab;
-    public Camera ActiveCamera;
+    
+    [HideInInspector] public Camera ActiveCamera;
 
     void Awake()
     {
@@ -23,7 +34,23 @@ public class GameManager : MonoBehaviour
 
         Instance = this;
         DontDestroyOnLoad(this);
-        LiveKitNetwork = GetComponent<LiveKitNetwork>();
+    }
+    
+    void Start()
+    {
+#if !UNITY_EDITOR && UNITY_WEBGL
+        if(isClient)
+            LiveKitNetwork.Instance.Room.LocalParticipant.IsSpeakingChanged += OnLocalSpeakingChanged;
+#endif
+
+    }
+    
+    void OnDestroy()
+    {
+#if !UNITY_EDITOR && UNITY_WEBGL
+        if(isClient)
+            LiveKitNetwork.Instance.Room.LocalParticipant.IsSpeakingChanged -= OnLocalSpeakingChanged;
+#endif
     }
 
     [Server]
@@ -33,11 +60,11 @@ public class GameManager : MonoBehaviour
         var redIndex = 0;
         var blueIndex = 0;
         
-        foreach (var p in LiveKitNetwork.Connections.Values)
+        foreach (var p in LiveKitNetwork.Instance.Connections.Values)
         {
             NetworkServer.RemovePlayerForConnection(p.NetConnection, true);
 
-            var pPrefab = LiveKitNetwork.playerPrefab;
+            var pPrefab = LiveKitNetwork.Instance.playerPrefab;
 
             Transform startPos;
             if (p.Team == Team.Red)
@@ -66,18 +93,19 @@ public class GameManager : MonoBehaviour
 
         if (numBlue >= pCount)
         {
-            GameState.Instance.BlueScore++;
-            GameState.Instance.RpcShowRoundWin(Team.Blue, restartDelay);
+            BlueScore++;
+            RpcShowRoundWin(Team.Blue, restartDelay);
             StartCoroutine(HandleRestart(restartDelay));
         }
         else if (numBlue == 0)
         {
-            GameState.Instance.RedScore++;
-            GameState.Instance.RpcShowRoundWin(Team.Red, restartDelay);
+            RedScore++;
+            RpcShowRoundWin(Team.Red, restartDelay);
             StartCoroutine(HandleRestart(restartDelay));
         }
     }
 
+    [Server]
     private IEnumerator HandleRestart(float startDelay)
     {
         if (m_RoundRestarting)
@@ -127,5 +155,36 @@ public class GameManager : MonoBehaviour
             var p = Player.Players.First();
             spec.RpcSpectatePlayer(client, p.Value);
         }
+    }
+    
+    [ClientRpc]
+    void RpcShowRoundWin(Team team, float time)
+    {
+        StartCoroutine(ShowRoundWin(team, time));
+    }
+
+    [Client]
+    IEnumerator ShowRoundWin(Team team, float time)
+    {
+        var text = team == Team.Red ? RedWon : BlueWon;
+        text.gameObject.SetActive(true);
+
+        yield return new WaitForSeconds(time);
+        text.gameObject.SetActive(false);
+    }
+    
+    void OnBlueScoreChanged(int old, int neww)
+    {
+        BlueText.text = neww.ToString();
+    }
+
+    void OnRedScoreChanged(int old, int neww)
+    {
+        RedText.text = neww.ToString();
+    }
+    
+    void OnLocalSpeakingChanged(bool speaking)
+    {
+        MicroImage.enabled = speaking;
     }
 }

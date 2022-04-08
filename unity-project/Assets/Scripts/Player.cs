@@ -23,6 +23,10 @@ public class Player : NetworkBehaviour
 
     public static Dictionary<string, Player> Players = new Dictionary<string, Player>();
     public static Player LocalPlayer { get; private set; }
+    
+    public delegate void PlayerDelagete(Player player);
+    public static event PlayerDelagete PlayerAdded;
+    public static event PlayerDelagete PlayerRemoved;
 
     // Properties
     public Light SpeakingLight;
@@ -66,26 +70,38 @@ public class Player : NetworkBehaviour
     private float m_LastFire;
 
     public Participant Participant { get; private set; } // LiveKit instance
+
+    private static void RegisterPlayer(Player player)
+    {
+        Players[player.Sid] = player;
+        PlayerAdded?.Invoke(player);
+    }
+    
+    private static void UnregisterPlayer(Player player)
+    {
+        Players.Remove(player.Sid);
+        PlayerRemoved?.Invoke(player);
+    }
     
     public override void OnStartServer()
     {
         base.OnStartServer();
 
         var connId = connectionToClient.connectionId;
-        Team = GameManager.Instance.LiveKitNetwork.Connections[connId].Team;
+        Team = LiveKitNetwork.Instance.Connections[connId].Team;
         
 #if !UNITY_EDITOR && UNITY_WEBGL
-        Sid = GameManager.Instance.LiveKitNetwork.Transport.GetParticipant(connId).Sid;
+        Sid = LiveKitNetwork.Instance.Transport.GetParticipant(connId).Sid;
 #else
         Sid = GUID.Generate().ToString();
 #endif
 
-        Players[Sid] = this;
+        RegisterPlayer(this);
     }
     
     public override void OnStartClient()
     {
-        Players[Sid] = this;
+        RegisterPlayer(this);
     }
     
     void Start()
@@ -276,12 +292,12 @@ public class Player : NetworkBehaviour
 
     public override void OnStopClient()
     {
-        Players.Remove(Sid);
+        UnregisterPlayer(this);
     }
 
     public override void OnStopServer()
     {
-        Players.Remove(Sid);
+        UnregisterPlayer(this);
     }
 
     /*
