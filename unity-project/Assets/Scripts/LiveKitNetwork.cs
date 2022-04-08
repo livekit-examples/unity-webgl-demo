@@ -21,7 +21,6 @@ public class ClientConnection
 public class LiveKitNetwork : NetworkManager
 {
     public static LiveKitNetwork Instance { get; private set; }
-
     public readonly Dictionary<int, ClientConnection> Connections = new Dictionary<int, ClientConnection>();
     
     [Header("LiveKit")]

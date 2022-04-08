@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
 using Random = UnityEngine.Random;
 using UnityEditor;
+using System.Linq;
 
 public enum Team : byte
 {
@@ -120,7 +121,7 @@ public class Player : NetworkBehaviour
         Projection.SetColor(Team == Team.Red ? RedColor : BlueColor);
 
 #if !UNITY_EDITOR && UNITY_WEBGL
-        var room = GameManager.Instance.LiveKitNetwork.Room;
+        var room = LiveKitNetwork.Instance.Room;
         if (Sid == room.LocalParticipant.Sid)
             Participant = room.LocalParticipant;
         else if (room.Participants.TryGetValue(Sid, out RemoteParticipant p))

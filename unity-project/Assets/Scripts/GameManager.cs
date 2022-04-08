@@ -185,6 +185,6 @@ public class GameManager : NetworkBehaviour
     
     void OnLocalSpeakingChanged(bool speaking)
     {
-        MicroImage.enabled = speaking;
+        MicroImage.gameObject.SetActive(speaking);
     }
 }
