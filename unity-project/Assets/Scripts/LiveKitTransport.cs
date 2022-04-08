@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using LiveKit;
 using Mirror;
 using UnityEngine;
@@ -8,18 +9,47 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class LiveKitTransport : Transport
 {
+    struct DataInfo
+    {
+        public byte[] Data;
+        public RemoteParticipant Destination;
+        public DataPacketKind Channel;
+    }
+    
     private static int NetId = 0;
-
+    private readonly Dictionary<int, Participant> m_Participants = new Dictionary<int, Participant>();
+    private readonly Dictionary<Participant, int> m_ConnectionIds = new Dictionary<Participant, int>();
+    private Queue<DataInfo> m_DataQueue = new Queue<DataInfo>();
+    
     public Room Room;
     public Participant Host;
 
-    private readonly Dictionary<int, Participant> m_Participants = new Dictionary<int, Participant>();
-    private readonly Dictionary<Participant, int> m_ConnectionIds = new Dictionary<Participant, int>();
+    void Awake()
+    {
+        StartCoroutine(HandleData());
+    }
 
-    private void HandleRoom()
+    IEnumerator HandleData()
+    {
+        while (true)
+        {
+            while (m_DataQueue.Any())
+            {
+                var info = m_DataQueue.Dequeue();
+                yield return Room.LocalParticipant.PublishData(info.Data, info.Channel, new[] { info.Destination });
+            }
+
+            yield return new WaitForEndOfFrame();
+        }
+    }
+
+    void HandleRoom()
     {
         Room.DataReceived += (data, p, channel) =>
         {
+            if (p == null)
+                return; // Ignore
+
             var channelId = channel == DataPacketKind.RELIABLE ? Channels.Reliable : Channels.Unreliable;
             if (p == Host)
                 OnClientDataReceived.Invoke(new ArraySegment<byte>(data), channelId);
@@ -27,7 +57,7 @@ public class LiveKitTransport : Transport
                 OnServerDataReceived.Invoke(m_ConnectionIds[p], new ArraySegment<byte>(data), channelId);
         };
     }
-
+    
     public override bool Available()
     {
         return Application.platform == RuntimePlatform.WebGLPlayer;
@@ -37,15 +67,7 @@ public class LiveKitTransport : Transport
     {
         return Room.State == RoomState.Connected;
     }
-
-    public Participant GetParticipant(int id)
-    {
-        if (!m_Participants.ContainsKey(id))
-            return null;
-
-        return m_Participants[id];
-    }
-
+    
     public override void ClientConnect(string address)
     {
         HandleRoom();
@@ -62,7 +84,12 @@ public class LiveKitTransport : Transport
     public override void ClientSend(ArraySegment<byte> segment, int channelId = Channels.Reliable)
     {
         var channelKind = channelId == Channels.Reliable ? DataPacketKind.RELIABLE : DataPacketKind.LOSSY;
-        Room.LocalParticipant.PublishData(segment.ToArray(), channelKind, new[] { Host as RemoteParticipant });
+        m_DataQueue.Enqueue(new DataInfo()
+        {
+            Data = segment.ToArray(),
+            Channel = channelKind,
+            Destination = Host as RemoteParticipant
+        });
     }
 
     public override void ClientDisconnect()
@@ -109,7 +136,12 @@ public class LiveKitTransport : Transport
     public override void ServerSend(int connId, ArraySegment<byte> segment, int channelId = Channels.Reliable)
     {
         var channelKind = channelId == Channels.Reliable ? DataPacketKind.RELIABLE : DataPacketKind.LOSSY;
-        Room.LocalParticipant.PublishData(segment.ToArray(), channelKind, new[] { GetParticipant(connId) as RemoteParticipant });
+        m_DataQueue.Enqueue(new DataInfo()
+        {
+            Data = segment.ToArray(),
+            Channel = channelKind,
+            Destination = GetParticipant(connId) as RemoteParticipant
+        });
     }
 
     public override void ServerDisconnect(int connectionId)
@@ -135,5 +167,10 @@ public class LiveKitTransport : Transport
     public override void Shutdown()
     {
 
+    }
+    
+    public Participant GetParticipant(int id)
+    {
+        return !m_Participants.ContainsKey(id) ? null : m_Participants[id];
     }
 }

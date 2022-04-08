@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Linq;
+using LiveKit;
 using Mirror;
 using TMPro;
 using UnityEngine;
@@ -16,6 +18,7 @@ public class GameManager : NetworkBehaviour
     public TMP_Text BlueWon;
     public Image MicroImage;
     public Spectator SpectatorPrefab;
+    public float MaxDistance = 25f;
 
     [SyncVar(hook=nameof(OnBlueScoreChanged))] [HideInInspector] public int BlueScore;
     [SyncVar(hook=nameof(OnRedScoreChanged))] [HideInInspector] public int RedScore;
@@ -44,7 +47,31 @@ public class GameManager : NetworkBehaviour
 #endif
 
     }
-    
+
+    void FixedUpdate()
+    {
+        // Really simple spatial audio
+        if (ActiveCamera == null)
+            return;
+        
+        foreach (var p in Player.Players)
+        {
+            var participant = p.Value.Participant;
+            if (participant == null || participant is LocalParticipant)
+                continue;
+
+            var track = participant.GetTrack(TrackSource.Microphone)?.Track as RemoteAudioTrack;
+            var audio = track?.AttachedElements.FirstOrDefault() as HTMLAudioElement;
+            
+            if(audio == null)
+                continue;
+            
+            var dist = Vector3.Distance(ActiveCamera.transform.position, p.Value.transform.position);
+            var volume = Mathf.Clamp(1f - dist / MaxDistance, 0f, 1f);
+            audio.Volume = volume;
+        } 
+    }
+
     void OnDestroy()
     {
 #if !UNITY_EDITOR && UNITY_WEBGL

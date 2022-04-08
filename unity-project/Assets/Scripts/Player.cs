@@ -103,6 +103,32 @@ public class Player : NetworkBehaviour
     public override void OnStartClient()
     {
         RegisterPlayer(this);
+
+#if !UNITY_EDITOR && UNITY_WEBGL
+        if (isLocalPlayer)
+        {
+            LiveKitNetwork.Instance.Room.LocalParticipant.SetCameraEnabled(true);
+            LiveKitNetwork.Instance.Room.LocalParticipant.SetMicrophoneEnabled(true);
+        }
+#endif
+    }
+
+    public override void OnStopClient()
+    {
+        UnregisterPlayer(this);
+        
+#if !UNITY_EDITOR && UNITY_WEBGL
+        if (isLocalPlayer)
+        {
+            LiveKitNetwork.Instance.Room.LocalParticipant.SetCameraEnabled(false);
+            LiveKitNetwork.Instance.Room.LocalParticipant.SetMicrophoneEnabled(false);
+        }
+#endif
+    }
+
+    public override void OnStopServer()
+    {
+        UnregisterPlayer(this);
     }
     
     void Start()
@@ -290,17 +316,7 @@ public class Player : NetworkBehaviour
     {
         Instantiate(PlayerExplosion, pos, rot);
     }
-
-    public override void OnStopClient()
-    {
-        UnregisterPlayer(this);
-    }
-
-    public override void OnStopServer()
-    {
-        UnregisterPlayer(this);
-    }
-
+    
     /*
      * Hooks
      */

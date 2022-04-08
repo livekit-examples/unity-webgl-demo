@@ -193,6 +193,8 @@ public class LiveKitNetwork : NetworkManager
 
         yield return Room.LocalParticipant.EnableCameraAndMicrophone();
 #endif
+
+
         ServerChangeScene("GameScene");
         
         if (host)
