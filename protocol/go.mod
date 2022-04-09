@@ -1,4 +1,4 @@
-module github.com/livekit/client-unity-demo/Protocol~
+module github.com/livekit/client-unity-demo/protocol
 
 go 1.17
 
