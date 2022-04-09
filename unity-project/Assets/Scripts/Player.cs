@@ -165,6 +165,7 @@ public class Player : NetworkBehaviour
         HealthBar.Username.text = Participant.Identity;
 
         Participant.TrackSubscribed += TrackSubscribed;
+        Participant.LocalTrackPublished += LocalTrackPublished;
         Participant.IsSpeakingChanged += SpeakingChanged;
 
         if (Participant.VideoTracks.Count >= 1)
@@ -176,6 +177,8 @@ public class Player : NetworkBehaviour
         }
 #endif
 
+
+        
     }
 
     void Update()
@@ -326,6 +329,7 @@ public class Player : NetworkBehaviour
         
 #if !UNITY_EDITOR && UNITY_WEBGL
         Participant.TrackSubscribed -= TrackSubscribed;
+        Participant.LocalTrackPublished -= LocalTrackPublished;
         Participant.IsSpeakingChanged -= SpeakingChanged;
 #endif
     }
@@ -339,13 +343,26 @@ public class Player : NetworkBehaviour
     /*
      * Hooks
      */
+
+    void HandleCamTrack(Track track)
+    {
+        Projection.UpdateTrack(track);
+    }
+    
+    void LocalTrackPublished(TrackPublication publication)
+    {
+        if (!(publication.Track is LocalVideoTrack))
+            return;
+
+        HandleCamTrack(publication.Track);
+    }
     
     void TrackSubscribed(Track track, TrackPublication publication)
     {
         if (!(track is RemoteVideoTrack))
             return;
             
-        Projection.UpdateTrack(track);
+        HandleCamTrack(track);
     }
 
     void SpeakingChanged(bool status)
