@@ -127,6 +127,7 @@ Material:
     - _BUILTIN_ZTest: 4
     - _BUILTIN_ZWrite: 0
     - _BUILTIN_ZWriteControl: 0
+    - _BackfaceOpacity: 1
     - _Bias: 0
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -163,11 +164,11 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 0.023803603, g: 0, b: 0.7924528, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissionColor: {r: 0.007843138, g: 0.007843138, b: 0.007843138, a: 1}
     - _FresnelColor: {r: 0.6179246, g: 0.62042177, b: 1, a: 1}
     - _HoloColor: {r: 0.039546248, g: 0.039546248, b: 0.039546248, a: 1}
     - _Hologram_Tiling: {r: 10, g: 10, b: 0, a: 0}
-    - _MainColor: {r: 0.3764706, g: 0.5803922, b: 3.4666667, a: 1}
+    - _MainColor: {r: 3.466667, g: 0.50449055, b: 0.3811518, a: 1}
     - _RimColor: {r: 0.552, g: 0.929, b: 0.984, a: 1}
     - _ScanlineData: {r: 12, g: 5, b: 1, a: 3}
     - _TintColor: {r: 0.03901863, g: 0, b: 1, a: 1}

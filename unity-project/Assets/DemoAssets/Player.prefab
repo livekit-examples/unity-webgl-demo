@@ -1491,7 +1491,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1225099270017306303}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1583,7 +1583,7 @@ MonoBehaviour:
   Speed: 6.5
   Gravity: -9.81
   Sensitivity: 2
-  RotationSpeed: 175
+  RotationSpeed: 160
   DamageVignetteDuration: 2
   HealthBar: {fileID: 7109620018218045665}
   RedColor: {r: 4.628273, g: 0.3811519, b: 0.3811519, a: 0}
@@ -4844,7 +4844,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5776089926854974916}
   m_LocalRotation: {x: 0.21182139, y: -0, z: -0, w: 0.97730845}
-  m_LocalPosition: {x: 2.41, y: 4.59, z: -4.57}
+  m_LocalPosition: {x: 2.41, y: 3.59, z: -4.57}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

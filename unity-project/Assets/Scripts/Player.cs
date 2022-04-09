@@ -41,7 +41,7 @@ public class Player : NetworkBehaviour
     public float Speed = 6.5f;
     public float Gravity = -9.81f;
     public float Sensitivity = 2.0f;
-    public float RotationSpeed = 175.0f;
+    public float RotationSpeed = 160.0f;
     public float DamageVignetteDuration = 1.5f;
     public HealthBar HealthBar;
 
@@ -69,6 +69,10 @@ public class Player : NetworkBehaviour
     private Vector3 m_Velocity;
     private Coroutine m_VignetteRoutine;
     private float m_LastFire;
+    
+    // Properties are get in the Start() method 
+    private Vector3 m_DefaultOrbitPos;
+    private float m_DefaultCameraDistance; // Distance to the orbit
 
     public Participant Participant { get; private set; } // LiveKit instance
 
@@ -145,6 +149,9 @@ public class Player : NetworkBehaviour
             GameManager.Instance.SetCameraStatus(Camera, isLocalPlayer);
         
         Projection.SetColor(Team == Team.Red ? RedColor : BlueColor);
+        
+        m_DefaultOrbitPos = CameraOrbit.transform.localPosition;
+        m_DefaultCameraDistance = Vector3.Distance(CameraOrbit.transform.position, Camera.transform.position);
 
 #if !UNITY_EDITOR && UNITY_WEBGL
         var room = LiveKitNetwork.Instance.Room;
@@ -168,7 +175,7 @@ public class Player : NetworkBehaviour
                 Projection.UpdateTrack(track);
         }
 #endif
-        
+
     }
 
     void Update()
@@ -208,9 +215,7 @@ public class Player : NetworkBehaviour
         {
             m_LastFire += MinigunRate;
             
-            var epsilon = 0.01f;
-            dir += new Vector3(Random.Range(-epsilon, epsilon), Random.Range(-epsilon, epsilon),
-                Random.Range(-epsilon, epsilon));
+            dir += Random.insideUnitSphere * 0.02f;
 
             if (!Physics.Raycast(startDir, dir, out RaycastHit hit)) 
                 return;
@@ -288,6 +293,20 @@ public class Player : NetworkBehaviour
         var yQuat = Quaternion.AngleAxis(m_Rotation.y, Vector3.left);
 
         CameraOrbit.transform.localRotation = xQuat * yQuat;
+
+        if (IsShooting)
+            CameraOrbit.transform.localPosition = m_DefaultOrbitPos + Random.insideUnitSphere * 0.07f;
+        else
+            CameraOrbit.transform.localPosition = m_DefaultOrbitPos;
+        
+        // Camera raycast (Avoid the camera to be outside the world)
+        var origin = CameraOrbit.transform.position;
+        var dir = Camera.transform.position - origin;
+        dir.Normalize();
+        if (Physics.Raycast(origin, dir, out var hit, m_DefaultCameraDistance))
+            Camera.transform.position = hit.point - dir * 0.2f;
+        else
+            Camera.transform.position = origin + dir * m_DefaultCameraDistance;
     }
 
     IEnumerator ShootEffect(Vector3 start, RaycastHit hit)
