@@ -94,9 +94,12 @@ public class Player : NetworkBehaviour
 
         var connId = connectionToClient.connectionId;
         Team = LiveKitNetwork.Instance.Connections[connId].Team;
-        
+
 #if !UNITY_EDITOR && UNITY_WEBGL
-        Sid = LiveKitNetwork.Instance.Transport.GetParticipant(connId).Sid;
+        if (connId == 0)
+            Sid = LiveKitNetwork.Instance.Transport.Host.Sid;  // Host
+        else
+            Sid = LiveKitNetwork.Instance.Transport.GetParticipant(connId).Sid;
 #else
         Sid = GUID.Generate().ToString();
 #endif
