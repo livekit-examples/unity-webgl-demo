@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/livekit/client-unity-demo/Protocol~/unity_proto"
-	"github.com/livekit/client-unity-demo/UnityAPI~/pkg/config"
+	"github.com/livekit/client-unity-demo/demo-api/pkg/config"
+	"github.com/livekit/client-unity-demo/protocol/unity_proto"
 	"github.com/livekit/protocol/auth"
 	lksdk "github.com/livekit/server-sdk-go"
 	"google.golang.org/protobuf/encoding/protojson"

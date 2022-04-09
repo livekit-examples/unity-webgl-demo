@@ -8,9 +8,9 @@ import (
 	"syscall"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/livekit/client-unity-demo/UnityAPI~/pkg/config"
-	"github.com/livekit/client-unity-demo/UnityAPI~/pkg/logger"
-	"github.com/livekit/client-unity-demo/UnityAPI~/pkg/service"
+	"github.com/livekit/client-unity-demo/demo-api/pkg/config"
+	"github.com/livekit/client-unity-demo/demo-api/pkg/logger"
+	"github.com/livekit/client-unity-demo/demo-api/pkg/service"
 	"github.com/urfave/cli"
 )
 

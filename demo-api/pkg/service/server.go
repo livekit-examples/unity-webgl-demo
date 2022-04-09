@@ -3,15 +3,15 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/livekit/client-unity-demo/protocol/unity_proto"
 	"net"
 	"net/http"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/livekit/client-unity-demo/Protocol~/unity_proto"
-	"github.com/livekit/client-unity-demo/UnityAPI~/pkg/config"
-	"github.com/livekit/client-unity-demo/UnityAPI~/pkg/logger"
+	"github.com/livekit/client-unity-demo/demo-api/pkg/config"
+	"github.com/livekit/client-unity-demo/demo-api/pkg/logger"
 	lksdk "github.com/livekit/server-sdk-go"
 	"github.com/rs/cors"
 	"github.com/urfave/negroni"

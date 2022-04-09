@@ -1,14 +1,12 @@
-module github.com/livekit/client-unity-demo/UnityAPI~
+module github.com/livekit/client-unity-demo/demo-api
 
 go 1.17
-
-replace github.com/livekit/client-unity-demo/Protocol~ => /Users/theomonnom/Desktop/livekit-demo/protocol
 
 require (
 	github.com/go-logr/logr v1.2.2
 	github.com/go-logr/zapr v1.2.3
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/livekit/client-unity-demo/Protocol~ v0.0.0-00010101000000-000000000000
+	github.com/livekit/client-unity-demo/protocol v0.0.0-20220409200630-8d3b8e37367c
 	github.com/livekit/protocol v0.11.14-0.20220223195254-d8c251e13231
 	github.com/livekit/server-sdk-go v0.9.1
 	github.com/rs/cors v1.8.2
