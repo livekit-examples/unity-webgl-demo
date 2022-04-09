@@ -16,6 +16,7 @@ public class PlayerExplosion : MonoBehaviour
                 rb.AddExplosionForce(Random.Range(MinForce, MaxForce), transform.position, Radius);
             
             // Remove destroyed pieces after some time.
+            Destroy(c.gameObject, Random.Range(15f, 30f));
         }
     }
 }
