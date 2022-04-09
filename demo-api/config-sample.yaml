@@ -1,0 +1,11 @@
+development: true
+log_level: info
+
+# Unity WebGL build path
+build_path: unity/
+port: 80
+
+livekit:
+  host: http://localhost:7880 # Ignore for now
+  api_key: key
+  secret_key: secret
