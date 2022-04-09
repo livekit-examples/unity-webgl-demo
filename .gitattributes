@@ -1,4 +1,4 @@
-unity-project/Assets/TextMesh*Pro/* linguist-vendored
+unity-project/Assets/TextMesh*Pro/** linguist-vendored
 *.gz filter=lfs diff=lfs merge=lfs -text
 *.psd filter=lfs diff=lfs merge=lfs -text
 *.png filter=lfs diff=lfs merge=lfs -text
