@@ -16,7 +16,7 @@ public class LiveKitTransport : Transport
         public DataPacketKind Channel;
     }
     
-    private static int NetId = 1;
+    private static int NetId = 1; // 0 is for LocalPlayer in Mirror
     private readonly Dictionary<int, Participant> m_Participants = new Dictionary<int, Participant>();
     private readonly Dictionary<Participant, int> m_ConnectionIds = new Dictionary<Participant, int>();
     private Queue<DataInfo> m_DataQueue = new Queue<DataInfo>();
@@ -110,7 +110,6 @@ public class LiveKitTransport : Transport
     public override void ServerStart()
     {
         HandleRoom();
-        HandleNewParticipant(Host); // Host always have the ID 1
 
         foreach (var p in Room.Participants.Values)
             HandleNewParticipant(p);

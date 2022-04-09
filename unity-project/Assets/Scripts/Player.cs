@@ -40,7 +40,7 @@ public class Player : NetworkBehaviour
     public int MaxHealth = 3000;
     public float Speed = 6.5f;
     public float Gravity = -9.81f;
-    public float Sensitivity = 2.0f;
+    public float Sensitivity = 1f;
     public float RotationSpeed = 160.0f;
     public float DamageVignetteDuration = 1.5f;
     public HealthBar HealthBar;

@@ -1582,7 +1582,7 @@ MonoBehaviour:
   MaxHealth: 3000
   Speed: 6.5
   Gravity: -9.81
-  Sensitivity: 2
+  Sensitivity: 1
   RotationSpeed: 160
   DamageVignetteDuration: 2
   HealthBar: {fileID: 7109620018218045665}
