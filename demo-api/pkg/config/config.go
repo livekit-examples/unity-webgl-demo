@@ -16,6 +16,8 @@ type Config struct {
 	Development bool          `yaml:"development"`
 	LogLevel    string        `yaml:"log_level"`
 	LiveKit     LiveKitConfig `yaml:"livekit"`
+	Port        uint32        `yaml:"port"`
+	BuildPath   string        `yaml:"build_path"`
 }
 
 func NewConfig(confString string) (*Config, error) {

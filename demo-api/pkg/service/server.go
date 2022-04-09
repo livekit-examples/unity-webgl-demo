@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/http"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/livekit/client-unity-demo/Protocol~/unity_proto"
@@ -38,16 +41,36 @@ func (s *UnityAPI) Start() error {
 
 	mux := http.NewServeMux()
 	mux.Handle(roomService.PathPrefix(), roomService)
+	mux.Handle("/", http.FileServer(http.Dir(s.config.BuildPath)))
 
-	n := negroni.New(negroni.NewRecovery(), cors.New(cors.Options{
+	n := negroni.New()
+	n.Use(negroni.NewRecovery())
+	n.Use(cors.New(cors.Options{
 		AllowOriginFunc: func(origin string) bool {
 			return true
 		},
 		AllowedHeaders: []string{"*"},
 	}))
+	n.UseFunc(func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+		// Support Unity gzip compression
+		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") && filepath.Ext(r.URL.Path) == ".gz" {
+
+			if r.URL.Path == "/Build/Build.wasm.gz" {
+				rw.Header().Set("Content-Type", "application/wasm")
+			}
+
+			rw.Header().Set("Content-Encoding", "gzip")
+		}
+
+		next.ServeHTTP(rw, r)
+	})
 	n.UseHandler(mux)
 
-	s.httpServer = &http.Server{Addr: ":8080", Handler: n}
+	s.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%d", s.config.Port),
+		Handler: n,
+	}
+
 	httpListener, err := net.Listen("tcp", s.httpServer.Addr)
 	if err != nil {
 		return err
