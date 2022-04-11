@@ -1,9 +1,5 @@
 FROM golang:1.17-alpine as builder
 
-ARG TARGETPLATFORM
-ARG TARGETARCH
-RUN echo building for "$TARGETPLATFORM"
-
 WORKDIR /workspace
 
 # Copy the Go Modules manifests
@@ -17,7 +13,7 @@ RUN go mod download
 COPY cmd/ cmd/
 COPY pkg/ pkg/
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH GO111MODULE=on go build -a -o unity-api ./cmd/server
+RUN CGO_ENABLED=0 go build -a -o unity-api ./cmd/server
 
 FROM alpine
 
