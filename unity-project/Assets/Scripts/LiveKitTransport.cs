@@ -9,22 +9,22 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public class LiveKitTransport : Transport
 {
-    struct DataInfo
+    /*struct DataInfo
     {
         public byte[] Data;
         public RemoteParticipant Destination;
         public DataPacketKind Channel;
-    }
+    }*/
     
     private static int NetId = 1; // 0 is for LocalPlayer in Mirror
     private readonly Dictionary<int, Participant> m_Participants = new Dictionary<int, Participant>();
     private readonly Dictionary<Participant, int> m_ConnectionIds = new Dictionary<Participant, int>();
-    private Queue<DataInfo> m_DataQueue = new Queue<DataInfo>();
+    //private Queue<DataInfo> m_DataQueue = new Queue<DataInfo>();
     
     public Room Room;
     public Participant Host;
 
-    void Awake()
+    /*void Awake()
     {
         StartCoroutine(HandleData());
     }
@@ -41,7 +41,7 @@ public class LiveKitTransport : Transport
 
             yield return new WaitForEndOfFrame();
         }
-    }
+    }*/
 
     void HandleRoom()
     {
@@ -84,12 +84,13 @@ public class LiveKitTransport : Transport
     public override void ClientSend(ArraySegment<byte> segment, int channelId = Channels.Reliable)
     {
         var channelKind = channelId == Channels.Reliable ? DataPacketKind.RELIABLE : DataPacketKind.LOSSY;
-        m_DataQueue.Enqueue(new DataInfo()
+        Room.LocalParticipant.PublishData(segment.ToArray(), channelKind, new[] { Host as RemoteParticipant });
+        /*m_DataQueue.Enqueue(new DataInfo()
         {
             Data = segment.ToArray(),
             Channel = channelKind,
             Destination = Host as RemoteParticipant
-        });
+        });*/
     }
 
     public override void ClientDisconnect()
@@ -135,12 +136,7 @@ public class LiveKitTransport : Transport
     public override void ServerSend(int connId, ArraySegment<byte> segment, int channelId = Channels.Reliable)
     {
         var channelKind = channelId == Channels.Reliable ? DataPacketKind.RELIABLE : DataPacketKind.LOSSY;
-        m_DataQueue.Enqueue(new DataInfo()
-        {
-            Data = segment.ToArray(),
-            Channel = channelKind,
-            Destination = GetParticipant(connId) as RemoteParticipant
-        });
+        Room.LocalParticipant.PublishData(segment.ToArray(), channelKind, new[] { GetParticipant(connId) as RemoteParticipant });
     }
 
     public override void ServerDisconnect(int connectionId)

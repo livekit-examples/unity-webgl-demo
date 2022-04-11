@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Linq;
 using LiveKit;
@@ -16,6 +15,7 @@ public class GameManager : NetworkBehaviour
     public TMP_Text RedText;
     public TMP_Text RedWon;
     public TMP_Text BlueWon;
+    public TMP_Text RTT;
     public Image MicroImage;
     public Spectator SpectatorPrefab;
     public float MaxDistance = 25f;
@@ -57,6 +57,8 @@ public class GameManager : NetworkBehaviour
         
         if (Input.GetMouseButtonDown(0))
             Cursor.lockState = CursorLockMode.Locked;
+
+        RTT.text = $"{Mathf.Round((float) (NetworkTime.rtt / 1000f))}ms";
     }
 
     void FixedUpdate()

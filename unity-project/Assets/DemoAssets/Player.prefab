@@ -1571,7 +1571,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 0.06666667
+  syncInterval: 0.1
   SpeakingLight: {fileID: 3825538499023737385}
   PlayerExplosion: {fileID: 7510512910580494968, guid: 6a58e8812a97e4af3916f19f6269aa04, type: 3}
   Projection: {fileID: 6565405464527672995}
@@ -1631,7 +1631,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   clientAuthority: 1
-  sendInterval: 0.03
+  sendInterval: 0.1
   syncPosition: 1
   syncRotation: 1
   syncScale: 0
@@ -1665,7 +1665,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   clientAuthority: 1
-  sendInterval: 0.03
+  sendInterval: 0.1
   syncPosition: 1
   syncRotation: 1
   syncScale: 0
@@ -1716,7 +1716,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   clientAuthority: 1
-  sendInterval: 0.03
+  sendInterval: 0.1
   syncPosition: 1
   syncRotation: 1
   syncScale: 0

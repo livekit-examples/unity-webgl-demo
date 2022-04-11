@@ -55,7 +55,7 @@ func (s *UnityAPI) Start() error {
 		// Support Unity gzip compression
 		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") && filepath.Ext(r.URL.Path) == ".gz" {
 
-			if r.URL.Path == "/Build/Build.wasm.gz" {
+			if r.URL.Path == "/Build/unity.wasm.gz" {
 				rw.Header().Set("Content-Type", "application/wasm")
 			}
 

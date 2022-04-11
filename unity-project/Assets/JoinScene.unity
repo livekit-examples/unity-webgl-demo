@@ -2550,7 +2550,7 @@ MonoBehaviour:
   dontDestroyOnLoad: 1
   runInBackground: 1
   autoStartServerBuild: 1
-  serverTickRate: 30
+  serverTickRate: 25
   offlineScene: Assets/JoinScene.unity
   onlineScene: Assets/GameScene.unity
   transport: {fileID: 1970854810}
@@ -2562,7 +2562,7 @@ MonoBehaviour:
   playerSpawnMethod: 0
   spawnPrefabs:
   - {fileID: 5869849627230116570, guid: 5c3ba5178a92f4cb694c491c91989a87, type: 3}
-  ServiceURL: http://localhost:8080/
+  ServiceURL: https://livekit-client-unity-demo.zeet-livekit-do-nyc1-staging.zeet.app/
   LiveKitURL: wss://encom.livekit.cloud
 --- !u!114 &1970854810
 MonoBehaviour:

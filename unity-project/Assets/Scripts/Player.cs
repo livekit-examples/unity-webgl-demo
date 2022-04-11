@@ -179,9 +179,6 @@ public class Player : NetworkBehaviour
                 Projection.UpdateTrack(track);
         }
 #endif
-
-
-        
     }
 
     void Update()
