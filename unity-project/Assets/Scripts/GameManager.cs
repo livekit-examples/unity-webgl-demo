@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using LiveKit;
@@ -57,8 +58,8 @@ public class GameManager : NetworkBehaviour
         
         if (Input.GetMouseButtonDown(0))
             Cursor.lockState = CursorLockMode.Locked;
-
-        RTT.text = $"{Mathf.Round((float) (NetworkTime.rtt / 1000f))}ms";
+        
+        RTT.text = $"{Math.Round(NetworkTime.rtt * 1000)}ms";
     }
 
     void FixedUpdate()

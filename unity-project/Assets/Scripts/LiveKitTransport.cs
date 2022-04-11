@@ -156,7 +156,7 @@ public class LiveKitTransport : Transport
 
     public override int GetMaxPacketSize(int channelId = Channels.Reliable)
     {
-        return 16000;
+        return 4096;
     }
 
     public override void Shutdown()
