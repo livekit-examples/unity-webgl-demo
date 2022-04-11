@@ -13,7 +13,7 @@ RUN go mod download
 COPY cmd/ cmd/
 COPY pkg/ pkg/
 
-RUN CGO_ENABLED=0 go build -a -o unity-api ./cmd/server
+RUN go build -o unity-api ./cmd/server
 
 FROM alpine
 
@@ -21,4 +21,4 @@ COPY --from=builder /workspace/unity-api /unity-api
 COPY unity/ unity/
 
 # Run the binary.
-ENTRYPOINT ["/unity-api"]
+ENTRYPOINT ["./unity-api"]

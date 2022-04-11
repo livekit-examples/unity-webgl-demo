@@ -19,9 +19,8 @@ func main() {
 		Name: "unity-demo-api",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:     "config",
-				Usage:    "path to the config file",
-				Required: true,
+				Name:  "config",
+				Usage: "path to the config file",
 			},
 		},
 		Action: startServer,
