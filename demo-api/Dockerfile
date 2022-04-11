@@ -22,6 +22,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH GO111MODULE=on go build -a -o un
 FROM alpine
 
 COPY --from=builder /workspace/unity-api /unity-api
+COPY unity/ unity/
 
 # Run the binary.
 ENTRYPOINT ["/unity-api"]

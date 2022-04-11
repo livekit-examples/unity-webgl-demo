@@ -34,12 +34,20 @@ func main() {
 
 func startServer(c *cli.Context) error {
 	configFile := c.String("config")
-	content, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		return err
+
+	var configBody string
+	if configFile == "" {
+		configBody = os.Getenv("LK_UNITY_CONFIG")
+	} else {
+		content, err := ioutil.ReadFile(configFile)
+		if err != nil {
+			return err
+		}
+
+		configBody = string(content)
 	}
 
-	conf, err := config.NewConfig(string(content))
+	conf, err := config.NewConfig(configBody)
 	if err != nil {
 		return err
 	}

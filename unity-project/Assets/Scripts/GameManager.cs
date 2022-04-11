@@ -45,7 +45,18 @@ public class GameManager : NetworkBehaviour
         if(isClient)
             LiveKitNetwork.Instance.Room.LocalParticipant.IsSpeakingChanged += OnLocalSpeakingChanged;
 #endif
+    }
 
+    void Update()
+    {
+        if (!isClient)
+            return;
+
+        if (Input.GetKey(KeyCode.Space))
+            Cursor.lockState = CursorLockMode.None;
+        
+        if (Input.GetMouseButtonDown(0))
+            Cursor.lockState = CursorLockMode.Locked;
     }
 
     void FixedUpdate()
