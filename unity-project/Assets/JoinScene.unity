@@ -2512,6 +2512,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1970854806}
   - component: {fileID: 1970854809}
+  - component: {fileID: 1970854812}
+  - component: {fileID: 1970854811}
   - component: {fileID: 1970854810}
   m_Layer: 0
   m_Name: LivekitNetwork
@@ -2553,7 +2555,7 @@ MonoBehaviour:
   serverTickRate: 25
   offlineScene: Assets/JoinScene.unity
   onlineScene: Assets/GameScene.unity
-  transport: {fileID: 1970854810}
+  transport: {fileID: 1970854812}
   networkAddress: localhost
   maxConnections: 100
   authenticator: {fileID: 0}
@@ -2573,9 +2575,53 @@ MonoBehaviour:
   m_GameObject: {fileID: 1970854802}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b0fecffa3f624585964b0d0eb21b18e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Port: 7777
+  DualMode: 1
+  NoDelay: 1
+  Interval: 80
+  Timeout: 10000
+  FastResend: 2
+  CongestionWindow: 0
+  SendWindowSize: 4096
+  ReceiveWindowSize: 4096
+  MaxRetransmit: 40
+  NonAlloc: 1
+  MaximizeSendReceiveBuffersToOSLimit: 1
+  ReliableMaxMessageSize: 298449
+  UnreliableMaxMessageSize: 1199
+  debugLog: 0
+  statisticsGUI: 0
+  statisticsLog: 0
+--- !u!114 &1970854811
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1970854802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fcd976c4077387f4f8f0ee0d34c00341, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1970854812
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1970854802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 929e3234c7db540b899f00183fc2b1fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  transports:
+  - {fileID: 1970854810}
+  - {fileID: 1970854811}
 --- !u!1 &1985758092
 GameObject:
   m_ObjectHideFlags: 0
