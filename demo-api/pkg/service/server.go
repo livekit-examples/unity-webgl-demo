@@ -60,7 +60,7 @@ func (s *UnityAPI) Start() error {
 			headers := rw.Header()
 
 			if exts[len(exts)-1] == "br" {
-				headers.Set("Content-Encoding", "gzip")
+				headers.Set("Content-Encoding", "br")
 			}
 
 			if len(exts) >= 2 {
