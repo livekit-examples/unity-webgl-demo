@@ -1,3 +1,4 @@
+using System;
 using LiveKit;
 using UnityEngine;
 
@@ -12,10 +13,16 @@ public class CameraProjection : MonoBehaviour
 
     public Track Track { get; private set; }
 
-    private void Awake()
+    void Awake()
     {
         m_MeshRenderer = GetComponent<MeshRenderer>();
-        enabled = false;
+        gameObject.SetActive(false);
+    }
+
+    void OnDestroy()
+    {
+        if (m_Video != null)
+            m_Video.VideoReceived -= VideoReceived;
     }
 
     public void SetColor(Color color)
@@ -32,12 +39,9 @@ public class CameraProjection : MonoBehaviour
     {
         if (nTrack == null)
         {
-            enabled = false;
+            gameObject.SetActive(false);
             return;
         }
-        
-        if (!(nTrack is LocalVideoTrack) && !(nTrack is RemoteVideoTrack))
-            return;
 
         if (Track == nTrack)
             return;
@@ -45,11 +49,16 @@ public class CameraProjection : MonoBehaviour
         Track?.Detach();
         Track = nTrack;
 
-        var video = Track.Attach() as HTMLVideoElement;
-        video.VideoReceived += tex =>
-        {
-            m_MeshRenderer.material.SetTexture(CameraTexture, tex);
-            enabled = true;
-        };
+        if (m_Video != null)
+            m_Video.VideoReceived -= VideoReceived;
+
+        m_Video = Track.Attach() as HTMLVideoElement;
+        m_Video.VideoReceived += VideoReceived;
+    }
+
+    void VideoReceived(Texture2D tex)
+    {
+        m_MeshRenderer.material.SetTexture(CameraTexture, tex);
+        gameObject.SetActive(true);
     }
 }

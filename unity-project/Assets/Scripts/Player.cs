@@ -1,33 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using LiveKit;
-using Mirror;
 using UnityEngine;
-using UnityEngine.Rendering.PostProcessing;
 using Random = UnityEngine.Random;
-using UnityEditor;
 using System.Linq;
 
-public enum Team : byte
-{
-    Red = 0,
-    Blue = 1
-}
-
-public class Player : NetworkBehaviour
+public class Player : MonoBehaviour
 {
     private static readonly int MovingSpeedAnim = Animator.StringToHash("MovingSpeed");
     private static readonly int RotatingSpeedAnim = Animator.StringToHash("RotatingSpeed");
     private static readonly int RotateStateAnim = Animator.StringToHash("Rotating");
     private static readonly int MoveStateAnim = Animator.StringToHash("Moving");
-    private static readonly int ShootingAnim = Animator.StringToHash("Shooting");
 
     public static Dictionary<string, Player> Players = new Dictionary<string, Player>();
+
     public static Player LocalPlayer { get; private set; }
-    
-    public delegate void PlayerDelagete(Player player);
-    public static event PlayerDelagete PlayerAdded;
-    public static event PlayerDelagete PlayerRemoved;
 
     // Properties
     public Light SpeakingLight;
@@ -42,131 +29,62 @@ public class Player : NetworkBehaviour
     public float Gravity = -9.81f;
     public float Sensitivity = 1f;
     public float RotationSpeed = 160.0f;
-    public float DamageVignetteDuration = 1.5f;
     public HealthBar HealthBar;
-
-    [ColorUsage(true, true)] public Color RedColor;
-    [ColorUsage(true, true)] public Color BlueColor;
-
-    // Minigun
-    public ParticleSystem MuzzleEffect;
-    public ParticleSystem ImpactEffect;
-    public TrailRenderer BulletTracer;
-    public GameObject MinigunPoint;
     public GameObject Cursor;
-    public int MinigunDamage = 10;
-    public float MinigunRate = 1/10f;
-
-    // Synced variables
-    [HideInInspector] [SyncVar] public Team Team;
-    [HideInInspector] [SyncVar] public string Sid; // Sid of the LiveKit Participant
-    [HideInInspector] [SyncVar(hook = nameof(OnShootingChanged))] public bool IsShooting;
-    [HideInInspector] [SyncVar(hook = nameof(OnHealthChanged))] public int Health;
+    public Minigun Minigun;
 
     private CharacterController m_Controller;
-    private float m_Horizontal, m_Vertical;
     private Vector2 m_Rotation;
     private Vector3 m_Velocity;
-    private Coroutine m_VignetteRoutine;
-    private float m_LastFire;
-    
-    // Properties are get in the Start() method 
     private Vector3 m_DefaultOrbitPos;
     private float m_DefaultCameraDistance; // Distance to the orbit
 
-    public Participant Participant { get; private set; } // LiveKit instance
-
-    private static void RegisterPlayer(Player player)
-    {
-        Players[player.Sid] = player;
-        PlayerAdded?.Invoke(player);
-    }
+    // Network 
+    private float m_LastHorizontal, m_LastVertical;
+    private float m_UpdateTime = 1f / 15f;
+    private float m_LastMoveTime;
+    private MovePacket? m_LastMovePacket;
+    private MovePacket? m_MovePacket;
     
-    private static void UnregisterPlayer(Player player)
-    {
-        Players.Remove(player.Sid);
-        PlayerRemoved?.Invoke(player);
-    }
+    // Synced variables
+    public Participant Participant;
+    public bool IsLocalPlayer { get; private set; }
+    [HideInInspector] public int Health;
+    [HideInInspector] public Color Color;
     
-    public override void OnStartServer()
+    void Awake()
     {
-        base.OnStartServer();
-
-        var connId = connectionToClient.connectionId;
-        Team = LiveKitNetwork.Instance.Connections[connId].Team;
-
-#if !UNITY_EDITOR && UNITY_WEBGL
-        if (connId == 0)
-            Sid = LiveKitNetwork.Instance.Transport.Host.Sid;  // Host
-        else
-            Sid = LiveKitNetwork.Instance.Transport.GetParticipant(connId).Sid;
-#else
-        Sid = GUID.Generate().ToString();
-#endif
-
-        RegisterPlayer(this);
-    }
-    
-    public override void OnStartClient()
-    {
-        RegisterPlayer(this);
-
-#if !UNITY_EDITOR && UNITY_WEBGL
-        if (isLocalPlayer)
-        {
-            LiveKitNetwork.Instance.Room.LocalParticipant.SetCameraEnabled(true);
-            LiveKitNetwork.Instance.Room.LocalParticipant.SetMicrophoneEnabled(true);
-        }
-#endif
-    }
-
-    public override void OnStopClient()
-    {
-        UnregisterPlayer(this);
+        NetworkManager.Instance.PacketReceived += PacketReceived;
         
-#if !UNITY_EDITOR && UNITY_WEBGL
-        if (isLocalPlayer)
-        {
-            LiveKitNetwork.Instance.Room.LocalParticipant.SetCameraEnabled(false);
-            LiveKitNetwork.Instance.Room.LocalParticipant.SetMicrophoneEnabled(false);
-        }
-#endif
+        Health = MaxHealth;
+        
+        m_Controller = GetComponent<CharacterController>();
+        m_DefaultOrbitPos = CameraOrbit.transform.localPosition;
+        m_DefaultCameraDistance = Vector3.Distance(CameraOrbit.transform.position, Camera.transform.position);
     }
 
-    public override void OnStopServer()
-    {
-        UnregisterPlayer(this);
-    }
-    
     void Start()
     {
-        Health = MaxHealth;
-        m_Controller = GetComponent<CharacterController>();
-        if (isLocalPlayer)
+        if (Players.TryGetValue(Participant.Sid, out var oPlayer))
+            DestroyImmediate(oPlayer.gameObject);
+        
+        Players.Add(Participant.Sid, this);
+
+        IsLocalPlayer = Participant == NetworkManager.Instance.Room.LocalParticipant;
+        if (IsLocalPlayer)
         {
             LocalPlayer = this;
             Projection.SetBackfaceOpacity(0.2f);
+            StartCoroutine(NetworkPosition());
+
+            NetworkManager.Instance.Room.LocalParticipant.SetCameraEnabled(true);
+            NetworkManager.Instance.Room.LocalParticipant.SetMicrophoneEnabled(true);
         }
         
-        if(Spectator.LocalSpectator == null)
-            GameManager.Instance.SetCameraStatus(Camera, isLocalPlayer);
-        
-        Projection.SetColor(Team == Team.Red ? RedColor : BlueColor);
-        
-        m_DefaultOrbitPos = CameraOrbit.transform.localPosition;
-        m_DefaultCameraDistance = Vector3.Distance(CameraOrbit.transform.position, Camera.transform.position);
-
-#if !UNITY_EDITOR && UNITY_WEBGL
-        var room = LiveKitNetwork.Instance.Room;
-        if (Sid == room.LocalParticipant.Sid)
-            Participant = room.LocalParticipant;
-        else if (room.Participants.TryGetValue(Sid, out RemoteParticipant p))
-            Participant = p;
-        else
-            Debug.LogError($"Player spawned without corresponding LiveKit Participant (Sid: {Sid})");
+        GameManager.Instance.SetCameraStatus(Camera, IsLocalPlayer);
+        Projection.SetColor(Color);
 
         HealthBar.Username.text = Participant.Identity;
-
         Participant.TrackSubscribed += TrackSubscribed;
         Participant.LocalTrackPublished += LocalTrackPublished;
         Participant.IsSpeakingChanged += SpeakingChanged;
@@ -178,113 +96,143 @@ public class Player : NetworkBehaviour
             if (track != null)
                 Projection.UpdateTrack(track);
         }
-#endif
+    }
+
+    void OnDestroy()
+    {
+        if (IsLocalPlayer)
+        {
+            NetworkManager.Instance.Room.LocalParticipant.SetCameraEnabled(false);
+            NetworkManager.Instance.Room.LocalParticipant.SetMicrophoneEnabled(false);
+            LocalPlayer = null;
+        }
+
+        NetworkManager.Instance.PacketReceived -= PacketReceived;
+        Participant.TrackSubscribed -= TrackSubscribed;
+        Participant.LocalTrackPublished -= LocalTrackPublished;
+        Participant.IsSpeakingChanged -= SpeakingChanged;
+        
+        Players.Remove(Participant.Sid);
+    }
+
+    void PacketReceived(RemoteParticipant rParticipant, IPacket p, DataPacketKind kind)
+    {
+        switch (p)
+        {
+            case MovePacket packet:
+                if (rParticipant != Participant)
+                    break;
+                
+                m_LastMoveTime = Time.time;
+                m_LastMovePacket = m_MovePacket;
+                m_MovePacket = packet;
+                break;
+            case AnimationPacket packet:
+                if (rParticipant != Participant)
+                    break;
+                
+                Animator.SetBool(MoveStateAnim, packet.MovingAnim);
+                Animator.SetBool(RotateStateAnim, packet.RotateAnim);
+                Animator.SetFloat(RotatingSpeedAnim, packet.RotateSpeed);
+                Animator.SetFloat(MovingSpeedAnim, packet.MovingSpeed);
+                break;
+            case DeathPacket packet:
+                {
+                    if (rParticipant != Participant)
+                        break;
+                    
+                    Players.TryGetValue(packet.KillerSid, out var killer);
+                    Kill(killer);
+                }
+                break;
+            case DamagePacket packet:
+                if (packet.Sid == Participant.Sid)
+                {
+                    Health -= Minigun.Damage;
+                    if (Health <= 0 && IsLocalPlayer)
+                    {
+                        NetworkManager.Instance.SendPacket(new DeathPacket
+                        {
+                            KillerSid = rParticipant.Sid
+                        }, DataPacketKind.RELIABLE);
+                        
+                        Players.TryGetValue(rParticipant.Sid, out var killer);
+                        Kill(killer);
+                    }
+                }
+                break;
+        }
     }
 
     void Update()
     {
-        if (!isLocalPlayer)
-            return;
-
-        // Inputs
-        m_Vertical = Input.GetAxisRaw("Vertical");
-        m_Horizontal = Input.GetAxisRaw("Horizontal");
-
-        var fire = Input.GetButton("Fire1");
-        if (fire && !IsShooting)
-            CmdUpdateShooting(true);
-        else if (!fire && IsShooting)
-            CmdUpdateShooting(false);
-    }
-
-    void FixedUpdate()
-    {
-        UpdateMinigun();
-        UpdateMovement();
-    }
-
-    void UpdateMinigun()
-    {
-        if (!IsShooting)
+        if (m_LastMovePacket != null)
         {
-            m_LastFire = Time.time;
-            return;
+            // Really simple interpolation
+            var t = (Time.time - m_LastMoveTime) / m_UpdateTime;
+            var last = m_LastMovePacket.Value;
+            var now = m_MovePacket.Value;
+            
+            transform.position = Vector3.LerpUnclamped(last.WorldPos, now.WorldPos, t);
+            Mesh.transform.localRotation = Quaternion.LerpUnclamped(last.WorldAngle, now.WorldAngle, t);
         }
 
-        var startDir = MinigunPoint.transform.position;
-        var dir = Cursor.transform.position - startDir;
-
-        while (Time.time - m_LastFire >= MinigunRate)
+        if (IsLocalPlayer)
         {
-            m_LastFire += MinigunRate;
-            
-            dir += Random.insideUnitSphere * 0.02f;
+            var vertical = Input.GetAxisRaw("Vertical");
+            var horizontal = Input.GetAxisRaw("Horizontal");
+            var moving = vertical != 0;
+            var rotating = horizontal != 0;
 
-            if (!Physics.Raycast(startDir, dir, out RaycastHit hit)) 
-                return;
-        
-            StartCoroutine(ShootEffect(startDir, hit));
+            Animator.SetFloat(MovingSpeedAnim, vertical * Speed / 5);
+            Animator.SetBool(MoveStateAnim, moving);
+            Animator.SetBool(RotateStateAnim, false);
 
-            // Apply damage
-            if (isServer)
+            m_Controller.Move(Mesh.transform.right * vertical * Speed * Time.deltaTime);
+
+            if (rotating)
             {
-                var rPlayer = hit.transform.GetComponent<Player>();
-                if (rPlayer == null || rPlayer.Team == Team)
-                    return;
-            
-                rPlayer.Health -= MinigunDamage;
-                if (rPlayer.Health <= 0)
+                Mesh.transform.localRotation =
+                    Quaternion.AngleAxis(RotationSpeed * horizontal * Time.deltaTime, Vector3.up)
+                    * Mesh.transform.localRotation;
+
+                if (!moving)
                 {
-                    var rTransform = rPlayer.transform;
-                    RpcExplode(rTransform.position, rTransform.rotation);
-                    NetworkServer.Destroy(rPlayer.gameObject);
-                    GameManager.Instance.ToSpectator(rPlayer.connectionToClient);
+                    Animator.SetFloat(RotatingSpeedAnim, horizontal);
+                    Animator.SetBool(RotateStateAnim, true);
                 }
             }
-        }
-    }
 
-    void UpdateMovement()
-    {
-        if (!isLocalPlayer) 
-            return;
-        
-        var moving = m_Vertical != 0;
-        var rotating = m_Horizontal != 0;
+            // Gravity 
+            if (m_Controller.isGrounded && m_Velocity.y < 0)
+                m_Velocity.y = 0f;
 
-        Animator.SetFloat(MovingSpeedAnim, m_Vertical * Speed / 5);
-        Animator.SetBool(MoveStateAnim, moving);
-        Animator.SetBool(RotateStateAnim, false);
+            m_Velocity.y += Gravity;
+            m_Controller.Move(m_Velocity * Time.deltaTime * Time.deltaTime / 2f);
 
-        m_Controller.Move(Mesh.transform.right * m_Vertical * Speed * Time.deltaTime);
-
-        if (rotating)
-        {
-            Mesh.transform.localRotation =
-                Quaternion.AngleAxis(RotationSpeed * m_Horizontal * Time.deltaTime, Vector3.up)
-                * Mesh.transform.localRotation;
-
-            if (!moving)
+            if (vertical != m_LastVertical || horizontal != m_LastHorizontal)
             {
-                Animator.SetFloat(RotatingSpeedAnim, m_Horizontal);
-                Animator.SetBool(RotateStateAnim, true);
+                // Send animation packet
+                NetworkManager.Instance.SendPacket(new AnimationPacket
+                {
+                    MovingAnim = Animator.GetBool(MoveStateAnim),
+                    RotateAnim = Animator.GetBool(RotateStateAnim),
+                    RotateSpeed = Animator.GetFloat(RotatingSpeedAnim),
+                    MovingSpeed = Animator.GetFloat(MovingSpeedAnim)
+                }, DataPacketKind.RELIABLE);
             }
+        
+            m_LastVertical = vertical;
+            m_LastHorizontal = horizontal;
         }
-
-        // Gravity 
-        if (m_Controller.isGrounded && m_Velocity.y < 0)
-            m_Velocity.y = 0f;
-
-        m_Velocity.y += Gravity;
-        m_Controller.Move(m_Velocity * Time.deltaTime * Time.deltaTime / 2f);
     }
 
     void LateUpdate()
     {
-        if (!isLocalPlayer)
+        // Update camera position
+        if (GameManager.Instance.ActiveCamera != Camera)
             return;
 
-        // Update camera position
         var deltaX = Input.GetAxis("Mouse X") * Sensitivity;
         var deltaY = Input.GetAxis("Mouse Y") * Sensitivity;
 
@@ -297,47 +245,51 @@ public class Player : NetworkBehaviour
 
         CameraOrbit.transform.localRotation = xQuat * yQuat;
 
-        if (IsShooting)
+        if (Minigun.IsShooting)
             CameraOrbit.transform.localPosition = m_DefaultOrbitPos + Random.insideUnitSphere * 0.07f;
         else
             CameraOrbit.transform.localPosition = m_DefaultOrbitPos;
-        
+
         // Camera raycast (Avoid the camera to be outside the world)
         var origin = CameraOrbit.transform.position;
         var dir = Camera.transform.position - origin;
         dir.Normalize();
+        
+        if(dir == Vector3.zero)
+            dir = Vector3.forward;
+        
         if (Physics.Raycast(origin, dir, out var hit, m_DefaultCameraDistance))
             Camera.transform.position = hit.point - dir * 0.2f;
         else
             Camera.transform.position = origin + dir * m_DefaultCameraDistance;
     }
-
-    IEnumerator ShootEffect(Vector3 start, RaycastHit hit)
+    
+    IEnumerator NetworkPosition()
     {
-        var tracer = Instantiate(BulletTracer, start, Quaternion.identity);
-        yield return new WaitForEndOfFrame();
-        tracer.transform.position = hit.point;
+        while (true)
+        {
+            NetworkManager.Instance.SendPacket(new MovePacket
+            {
+                WorldPos = transform.position,
+                WorldAngle = Mesh.transform.localRotation
+            }, DataPacketKind.LOSSY);
 
-        var i = Instantiate(ImpactEffect, hit.point, Quaternion.LookRotation(hit.normal));
-        i.Play();
+            yield return new WaitForSecondsRealtime(m_UpdateTime);
+        }
     }
 
-    void OnDestroy()
+    void Kill(Player killer)
     {
-        if(isServer)
-            GameManager.Instance.UpdateScore(5f);
-        
-#if !UNITY_EDITOR && UNITY_WEBGL
-        Participant.TrackSubscribed -= TrackSubscribed;
-        Participant.LocalTrackPublished -= LocalTrackPublished;
-        Participant.IsSpeakingChanged -= SpeakingChanged;
-#endif
-    }
+        Instantiate(PlayerExplosion, Mesh.transform.position, Mesh.transform.rotation);
+        Destroy(gameObject);
 
-    [ClientRpc]
-    void RpcExplode(Vector3 pos, Quaternion rot)
-    {
-        Instantiate(PlayerExplosion, pos, rot);
+        if (killer != null)
+        {
+            GameManager.Instance.SetScore(killer.Participant, GameManager.Instance.GetScore(killer.Participant) + 1);
+            
+            if (IsLocalPlayer)
+                GameManager.Instance.SpectateKiller(killer);
+        }
     }
     
     /*
@@ -348,7 +300,7 @@ public class Player : NetworkBehaviour
     {
         Projection.UpdateTrack(track);
     }
-    
+
     void LocalTrackPublished(TrackPublication publication)
     {
         if (!(publication.Track is LocalVideoTrack))
@@ -356,63 +308,17 @@ public class Player : NetworkBehaviour
 
         HandleCamTrack(publication.Track);
     }
-    
+
     void TrackSubscribed(Track track, TrackPublication publication)
     {
         if (!(track is RemoteVideoTrack))
             return;
-            
+
         HandleCamTrack(track);
     }
 
     void SpeakingChanged(bool status)
     {
         SpeakingLight.enabled = status;
-    }
-
-    [Command]
-    void CmdUpdateShooting(bool status)
-    {
-        IsShooting = status;
-    }
-
-    void OnShootingChanged(bool oldValue, bool newValue)
-    {
-        if (newValue)
-            MuzzleEffect.Play();
-        else
-            MuzzleEffect.Stop();
-
-        if (hasAuthority)
-            Animator.SetBool(ShootingAnim, newValue);
-    }
-
-    void OnHealthChanged(int oldValue, int newValue)
-    {
-        if (newValue < oldValue)
-        {
-            // Display "damage" effect.
-            var pp = Camera.GetComponent<PostProcessVolume>();
-            var v = pp.profile.GetSetting<Vignette>();
-    
-            if(m_VignetteRoutine != null)
-                StopCoroutine(m_VignetteRoutine);
-            
-            m_VignetteRoutine = StartCoroutine(UpdateVignette(v, Time.time));
-        }
-    }
-
-    IEnumerator UpdateVignette(Vignette vignette, float startTime)
-    {
-        while(true)
-        {
-            var dt = Time.time - startTime;
-            vignette.color.value = Color.Lerp(Color.red, Color.black, dt/DamageVignetteDuration);
-
-            if (dt >= DamageVignetteDuration)
-                break;
-                
-            yield return new WaitForEndOfFrame();
-        }
     }
 }

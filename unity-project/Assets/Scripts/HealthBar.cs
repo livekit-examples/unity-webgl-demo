@@ -14,7 +14,7 @@ public class HealthBar : MonoBehaviour
     
     void Start()
     {
-        if (Player.isLocalPlayer)
+        if (Player.IsLocalPlayer)
             Destroy(gameObject);
 
         m_RedSpeed = Player.MaxHealth / 8f;

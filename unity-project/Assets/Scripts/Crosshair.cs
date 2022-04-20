@@ -7,13 +7,13 @@ public class Crosshair : MonoBehaviour
     // isLocalPlayer isn't ready on Awake() event
     void Start()
     {
-        if (!Player.isLocalPlayer)
+        if (!Player.IsLocalPlayer)
             Destroy(gameObject);
     }
 
     void Update()
     {
-        var start = Player.MinigunPoint.transform.position;
+        var start = Player.Minigun.MinigunPoint.transform.position;
         var dir = Player.Cursor.transform.position - start;
         dir.Normalize();
 

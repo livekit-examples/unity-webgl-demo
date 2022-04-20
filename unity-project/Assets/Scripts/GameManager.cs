@@ -1,32 +1,25 @@
-using System;
 using System.Collections;
-using System.Linq;
+using System.Collections.Generic;
 using LiveKit;
-using Mirror;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
-using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
-public class GameManager : NetworkBehaviour
+public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
     
-    public TMP_Text BlueText;
-    public TMP_Text RedText;
-    public TMP_Text RedWon;
-    public TMP_Text BlueWon;
-    public TMP_Text RTT;
-    public Image MicroImage;
-    public Spectator SpectatorPrefab;
-    public float MaxDistance = 25f;
+    // Properties
+    public float HearDistance = 15f;
+    public Player PlayerPrefab;
+    public Transform SpawnPositions;
+    public UI UI;
 
-    [SyncVar(hook=nameof(OnBlueScoreChanged))] [HideInInspector] public int BlueScore;
-    [SyncVar(hook=nameof(OnRedScoreChanged))] [HideInInspector] public int RedScore;
-    
-    private bool m_RoundRestarting;
+    public Dictionary<Participant, int> Scores = new Dictionary<Participant, int>();
     
     [HideInInspector] public Camera ActiveCamera;
+    
+    private bool m_RoundRestarting;
 
     void Awake()
     {
@@ -39,27 +32,80 @@ public class GameManager : NetworkBehaviour
         Instance = this;
         DontDestroyOnLoad(this);
     }
-    
-    void Start()
+
+    IEnumerator Start()
     {
-#if !UNITY_EDITOR && UNITY_WEBGL
-        if(isClient)
-            LiveKitNetwork.Instance.Room.LocalParticipant.IsSpeakingChanged += OnLocalSpeakingChanged;
-#endif
+        NetworkManager.Instance.PacketReceived += PacketReceived;
+        NetworkManager.Instance.Room.ParticipantDisconnected += participant =>
+        {
+            if (Player.Players.TryGetValue(participant.Sid, out var player))
+                Destroy(player.gameObject);
+        };
+        NetworkManager.Instance.Room.TrackSubscribed += (track, publication, participant) =>
+        {
+            if (track.Kind == TrackKind.Audio)
+                track.Attach();
+        };
+        NetworkManager.Instance.Room.TrackUnsubscribed += (track, publication, participant) =>
+        {
+            if (track.Kind == TrackKind.Audio)
+                track.Detach();
+        };
+        
+        yield return NetworkManager.Instance.SendPacket(new ReadyPacket(), DataPacketKind.RELIABLE);
+        
+        JoinGame();
+        UI.UpdateRanking();
+    }
+    
+    void PacketReceived(RemoteParticipant participant, IPacket p, DataPacketKind kind)
+    {
+        switch (p)
+        {
+            case ReadyPacket:
+                // Player is ready, send local info
+                var lp = Player.LocalPlayer;
+                if (lp != null)
+                {
+                    NetworkManager.Instance.SendPacket(new JoinPacket
+                    {
+                        WorldPos = lp.transform.position,
+                        Health = lp.Health,
+                        Color = lp.Color
+                    }, DataPacketKind.RELIABLE, participant);
+                }
+
+                Scores.TryGetValue(NetworkManager.Instance.Room.LocalParticipant, out var score);
+                NetworkManager.Instance.SendPacket(new ScorePacket
+                {
+                    Score = score
+                }, DataPacketKind.RELIABLE, participant);
+                
+                return;
+            case ScorePacket packet:
+                SetScore(participant, packet.Score + GetScore(participant));
+                break;
+            case JoinPacket packet:
+                CreatePlayer(participant, packet.WorldPos, packet.Color);
+                return;
+        }
+    }
+
+    Player CreatePlayer(Participant participant, Vector3 pos, Color color)
+    {
+        var p = Instantiate(PlayerPrefab, pos, Quaternion.identity);
+        p.Participant = participant;
+        p.Color = color;
+        return p;
     }
 
     void Update()
     {
-        if (!isClient)
-            return;
-
         if (Input.GetKey(KeyCode.Space))
             Cursor.lockState = CursorLockMode.None;
         
         if (Input.GetMouseButtonDown(0))
             Cursor.lockState = CursorLockMode.Locked;
-        
-        RTT.text = $"{Math.Round(NetworkTime.rtt * 1000)}ms";
     }
 
     void FixedUpdate()
@@ -71,94 +117,19 @@ public class GameManager : NetworkBehaviour
         foreach (var p in Player.Players)
         {
             var participant = p.Value.Participant;
-            if (participant == null || participant is LocalParticipant)
+            if (participant == null || participant is LocalParticipant) 
                 continue;
 
             var track = participant.GetTrack(TrackSource.Microphone)?.Track as RemoteAudioTrack;
-            var audio = track?.AttachedElements.FirstOrDefault() as HTMLAudioElement;
-            
-            if(audio == null)
+            if(track == null)
                 continue;
             
             var dist = Vector3.Distance(ActiveCamera.transform.position, p.Value.transform.position);
-            var volume = Mathf.Clamp(1f - dist / MaxDistance, 0f, 1f);
-            audio.Volume = volume;
+            var volume = 1f - Mathf.Clamp(dist / HearDistance, 0f, 1f);
+            track.SetVolume(volume);
         } 
     }
-
-    void OnDestroy()
-    {
-#if !UNITY_EDITOR && UNITY_WEBGL
-        if(isClient)
-            LiveKitNetwork.Instance.Room.LocalParticipant.IsSpeakingChanged -= OnLocalSpeakingChanged;
-#endif
-    }
-
-    [Server]
-    public void StartRound()
-    {
-        var posLength = World.Instance.RedPositions.transform.childCount;
-        var redIndex = 0;
-        var blueIndex = 0;
-        
-        foreach (var p in LiveKitNetwork.Instance.Connections.Values)
-        {
-            NetworkServer.RemovePlayerForConnection(p.NetConnection, true);
-
-            var pPrefab = LiveKitNetwork.Instance.playerPrefab;
-
-            Transform startPos;
-            if (p.Team == Team.Red)
-                startPos = World.Instance.RedPositions.transform.GetChild(redIndex++ % posLength);
-            else
-                startPos = World.Instance.BluePositions.transform.GetChild(blueIndex++ % posLength);
-            
-            var playerObject = Instantiate(pPrefab, startPos.position, startPos.rotation);
-            playerObject.name = $"{pPrefab.name} [connId={p.NetConnection.connectionId}]";
-            
-            NetworkServer.AddPlayerForConnection(p.NetConnection, playerObject);
-        }
-    }
-
-    [Server]
-    public void UpdateScore(float restartDelay)
-    {
-        var pCount = Player.Players.Count;
-        if (pCount == 0)
-            return;
-        
-        var numBlue = 0;
-        foreach (var p in Player.Players.Values)
-            if (p.Team == Team.Blue)
-                numBlue++;
-
-        if (numBlue >= pCount)
-        {
-            BlueScore++;
-            RpcShowRoundWin(Team.Blue, restartDelay);
-            StartCoroutine(HandleRestart(restartDelay));
-        }
-        else if (numBlue == 0)
-        {
-            RedScore++;
-            RpcShowRoundWin(Team.Red, restartDelay);
-            StartCoroutine(HandleRestart(restartDelay));
-        }
-    }
-
-    [Server]
-    private IEnumerator HandleRestart(float startDelay)
-    {
-        if (m_RoundRestarting)
-            yield break;
-        
-        m_RoundRestarting = true;
-        yield return new WaitForSeconds(startDelay);
-        StartRound();
-        m_RoundRestarting = false;
-    }
     
-    [Client]
     public void SetCameraStatus(Camera camera, bool status)
     {
         if (status)
@@ -184,48 +155,43 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    [Server]
-    public void ToSpectator(NetworkConnectionToClient client, bool specRandom = true)
+    public void JoinGame()
     {
-        NetworkServer.RemovePlayerForConnection(client, true);
-        var spec = Instantiate(SpectatorPrefab);
-        NetworkServer.AddPlayerForConnection(client, spec.gameObject);
-
-        if (specRandom)
+        var r = Random.Range(0, SpawnPositions.childCount);
+        var startPos = SpawnPositions.GetChild(r).position;
+        
+        var player = CreatePlayer(NetworkManager.Instance.Room.LocalParticipant, startPos, JoinHandler.SelectedColor);
+        NetworkManager.Instance.SendPacket(new JoinPacket
         {
-            var p = Player.Players.First();
-            spec.RpcSpectatePlayer(client, p.Value);
-        }
-    }
-    
-    [ClientRpc]
-    void RpcShowRoundWin(Team team, float time)
-    {
-        StartCoroutine(ShowRoundWin(team, time));
+            WorldPos = startPos,
+            Health = player.Health,
+            Color = player.Color
+        }, DataPacketKind.RELIABLE);
     }
 
-    [Client]
-    IEnumerator ShowRoundWin(Team team, float time)
+    public void SetScore(Participant participant, int score)
     {
-        var text = team == Team.Red ? RedWon : BlueWon;
-        text.gameObject.SetActive(true);
-
-        yield return new WaitForSeconds(time);
-        text.gameObject.SetActive(false);
-    }
-    
-    void OnBlueScoreChanged(int old, int neww)
-    {
-        BlueText.text = neww.ToString();
+        Scores[participant] = score;
+        UI.UpdateRanking();
     }
 
-    void OnRedScoreChanged(int old, int neww)
+    public int GetScore(Participant participant)
     {
-        RedText.text = neww.ToString();
+        Scores.TryGetValue(participant, out int score); // Default to 0
+        return score;
     }
-    
-    void OnLocalSpeakingChanged(bool speaking)
+
+    public void SpectateKiller(Player killer, int respawnDelay = 8)
     {
-        MicroImage.gameObject.SetActive(speaking);
+        UI.ShowKilled(killer);
+        SetCameraStatus(killer.Camera, true);
+        StartCoroutine(WaitRespawn(respawnDelay));
+    }
+
+    IEnumerator WaitRespawn(int delay)
+    {
+        yield return new WaitForSeconds(delay);
+        UI.HideKilled();
+        JoinGame();
     }
 }

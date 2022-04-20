@@ -52,14 +52,25 @@ func (s *UnityAPI) Start() error {
 		AllowedHeaders: []string{"*"},
 	}))
 	n.UseFunc(func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-		// Support Unity gzip compression
-		if strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") && filepath.Ext(r.URL.Path) == ".gz" {
+		// Support Brotli compression & wasm streaming
+		filename := filepath.Base(r.URL.Path)
+		exts := strings.Split(filename, ".")
 
-			if r.URL.Path == "/Build/unity.wasm.gz" {
-				rw.Header().Set("Content-Type", "application/wasm")
+		if strings.Contains(r.Header.Get("Accept-Encoding"), "br") && len(exts) >= 1 {
+			headers := rw.Header()
+
+			if exts[len(exts)-1] == "br" {
+				headers.Set("Content-Encoding", "gzip")
 			}
 
-			rw.Header().Set("Content-Encoding", "gzip")
+			if len(exts) >= 2 {
+				switch exts[len(exts)-2] {
+				case "wasm":
+					headers.Set("Content-Type", "application/wasm")
+				case "js":
+					headers.Set("Content-Type", "application/javascript")
+				}
+			}
 		}
 
 		next.ServeHTTP(rw, r)

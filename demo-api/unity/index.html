@@ -9,7 +9,7 @@
   </head>
   <body>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600></canvas>
+      <canvas id="unity-canvas" width=1280 height=720></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
@@ -58,9 +58,9 @@
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/unity.loader.js";
       var config = {
-        dataUrl: buildUrl + "/unity.data.gz",
-        frameworkUrl: buildUrl + "/unity.framework.js.gz",
-        codeUrl: buildUrl + "/unity.wasm.gz",
+        dataUrl: buildUrl + "/d90b08726a3674573dfe2eff5f647101.data.br",
+        frameworkUrl: buildUrl + "/00d4327aab4fe6cbbe1196e1f238804b.js.br",
+        codeUrl: buildUrl + "/cf74837ae87573a0a9a71f069f573f10.wasm.br",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "LiveKitDemo",
@@ -93,8 +93,8 @@
       } else {
         // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
 
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
+        canvas.style.width = "1280px";
+        canvas.style.height = "720px";
       }
 
       loadingBar.style.display = "block";

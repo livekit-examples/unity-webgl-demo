@@ -8,7 +8,6 @@ import (
 	"github.com/livekit/client-unity-demo/protocol/unity_proto"
 	"github.com/livekit/protocol/auth"
 	lksdk "github.com/livekit/server-sdk-go"
-	"google.golang.org/protobuf/encoding/protojson"
 )
 
 var (
@@ -36,24 +35,13 @@ func (s *UnityService) RequestJoinToken(ctx context.Context, req *unity_proto.Jo
 		return nil, ErrRoomNameEmpty
 	}
 
-	metadata := &unity_proto.ParticipantMetadata{
-		IsHost: req.Host,
-	}
-
-	jsonBytes, err := protojson.Marshal(metadata)
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO Check if the RoomName already exists
 	grant := &auth.VideoGrant{
 		Room:     req.RoomName,
 		RoomJoin: true,
 	}
 
 	token.SetIdentity(req.ParticipantName).
-		AddGrant(grant).
-		SetMetadata(string(jsonBytes))
+		AddGrant(grant)
 
 	jwt, err := token.ToJWT()
 	if err != nil {
