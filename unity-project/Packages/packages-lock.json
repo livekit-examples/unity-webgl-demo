@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "be.feeps.tools": {
+      "version": "file:/Users/theomonnom/Desktop/feeps-tools",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "be.feeps.twirpunity": {
       "version": "https://github.com/ifl-studio/twirp-client-unity.git?path=twirp-package",
       "depth": 0,

@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "be.feeps.tools": "file:/Users/theomonnom/Desktop/feeps-tools",
     "be.feeps.twirpunity": "https://github.com/ifl-studio/twirp-client-unity.git?path=twirp-package",
     "com.unity.collab-proxy": "1.15.13",
     "com.unity.feature.development": "1.0.1",

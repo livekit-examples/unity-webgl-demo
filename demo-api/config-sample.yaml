@@ -9,3 +9,5 @@ livekit:
   host: http://localhost:7880 # Ignore for now
   api_key: key
   secret_key: secret
+
+  # docker run -p 80:80 -v $PWD/config-sample.yaml:/config-sample.yaml -v $PWD/unity:/unity demo-api --config config-sample.yaml
