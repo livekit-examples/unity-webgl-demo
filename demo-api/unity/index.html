@@ -58,9 +58,9 @@
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/unity.loader.js";
       var config = {
-        dataUrl: buildUrl + "/0e2508bd40cc37a942771ffe2a68151b.data.br",
-        frameworkUrl: buildUrl + "/df0d8f3ad98108c4928951b405b34d95.js.br",
-        codeUrl: buildUrl + "/f19cc6faded5cc2e7fed6bd13e90ba1c.wasm.br",
+        dataUrl: buildUrl + "/aefca9c30714407aeabcd80a13920fc9.data.br",
+        frameworkUrl: buildUrl + "/a97023b0d15975d06a073035fc22626f.js.br",
+        codeUrl: buildUrl + "/8831efffc16f160d5fa1c9ed7dea4b6e.wasm.br",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "LiveKitDemo",
@@ -90,6 +90,8 @@
 
         canvas.style.width = window.innerWidth + 'px';
         canvas.style.height = window.innerHeight + 'px';
+
+        unityShowBanner('WebGL builds are not supported on mobile devices.');
       } else {
         // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
 
