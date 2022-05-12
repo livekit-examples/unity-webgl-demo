@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Protocol
 {
-    public const int MaxPacketSize = 256; // We shouldn't need more for the demo ( header is included and there's no buffer resizing )
+    public const int MaxPacketSize = 512; // We shouldn't need more for the demo ( header is included and there's no buffer resizing )
 
     public static readonly Dictionary<Type, ushort> PacketIds = new Dictionary<Type, ushort>();
     public static readonly Dictionary<ushort, Type> PacketType = new Dictionary<ushort, Type>();

@@ -141,6 +141,8 @@ public class Player : MonoBehaviour
                     if (rParticipant != Participant)
                         break;
                     
+                    Debug.Log($"Received DeathPacket for {Participant.Sid}");
+                    
                     Players.TryGetValue(packet.KillerSid, out var killer);
                     Kill(killer);
                 }

@@ -51,7 +51,9 @@ public class GameManager : MonoBehaviour
             if (track.Kind == TrackKind.Audio)
                 track.Detach();
         };
+        Debug.Log($"LocalParticipant SID: {NetworkManager.Instance.Room.LocalParticipant.Sid}");
         
+        Debug.Log("Sending Ready");
         yield return NetworkManager.Instance.SendPacket(new ReadyPacket(), DataPacketKind.RELIABLE);
         
         JoinGame();
@@ -63,10 +65,13 @@ public class GameManager : MonoBehaviour
         switch (p)
         {
             case ReadyPacket:
+                Debug.Log($"{participant.Sid} is ready");
+                
                 // Player is ready, send local info
                 var lp = Player.LocalPlayer;
                 if (lp != null)
                 {
+                    Debug.Log($"\tCurrently playing, sending JoinPacket to {participant.Sid}");
                     NetworkManager.Instance.SendPacket(new JoinPacket
                     {
                         WorldPos = lp.transform.position,
@@ -81,13 +86,14 @@ public class GameManager : MonoBehaviour
                     Score = score
                 }, DataPacketKind.RELIABLE, participant);
                 
-                return;
+                break;
             case ScorePacket packet:
                 SetScore(participant, packet.Score + GetScore(participant));
                 break;
             case JoinPacket packet:
+                Debug.Log($"Received JoinPacket from {participant.Sid}, creating a player");
                 CreatePlayer(participant, packet.WorldPos, packet.Color);
-                return;
+                break;
         }
     }
 
@@ -157,6 +163,7 @@ public class GameManager : MonoBehaviour
 
     public void JoinGame()
     {
+        Debug.Log("Joining the game & tell the others");
         var r = Random.Range(0, SpawnPositions.childCount);
         var startPos = SpawnPositions.GetChild(r).position;
         
@@ -183,6 +190,7 @@ public class GameManager : MonoBehaviour
 
     public void SpectateKiller(Player killer, int respawnDelay = 8)
     {
+        Debug.Log($"Spectating {killer.Participant.Sid}");
         UI.ShowKilled(killer);
         SetCameraStatus(killer.Camera, true);
         StartCoroutine(WaitRespawn(respawnDelay));

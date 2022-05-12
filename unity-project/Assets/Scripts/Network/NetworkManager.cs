@@ -81,6 +81,8 @@ public class NetworkManager : MonoBehaviour
             yield break;
         }
         
+        Debug.Log("Connected to the Room");
+        
         Connected?.Invoke(Room);
         m_Connecting = false;
     }
@@ -88,16 +90,22 @@ public class NetworkManager : MonoBehaviour
     private void DataReceived(byte[] data, RemoteParticipant participant, DataPacketKind? kind)
     {
         if (participant == null)
-            return; // Ignore packets coming from the Server API
+        {
+            Debug.Log("Received a packet coming from the Server API ? ( Ignoring ..) ");
+            return;
+        }
 
         var packet = m_PacketReader.UnserializePacket(data);
         if (packet == null)
+        {
+            Debug.LogError($"Failed to unserialize incoming packet from {participant.Sid}");
             return;
+        }
         
         PacketReceived?.Invoke(participant, packet, (DataPacketKind) kind);
     }
 
-    public IEnumerator SendPacket<T>(T packet, DataPacketKind kind, params RemoteParticipant[] participants) where T : IPacket
+    public JSPromise SendPacket<T>(T packet, DataPacketKind kind, params RemoteParticipant[] participants) where T : IPacket
     {
         var data = m_PacketWriter.SerializePacket(packet);
         return Room.LocalParticipant.PublishData(data.Array, data.Offset, data.Count, kind, participants);
