@@ -35,23 +35,37 @@ public class GameManager : MonoBehaviour
 
     IEnumerator Start()
     {
-        NetworkManager.Instance.PacketReceived += PacketReceived;
+        NetworkManager.Instance.Room.ParticipantConnected += participant =>
+        {
+            Debug.Log($"Participant connected : {participant.Sid}");
+        };
+        
         NetworkManager.Instance.Room.ParticipantDisconnected += participant =>
         {
             if (Player.Players.TryGetValue(participant.Sid, out var player))
                 Destroy(player.gameObject);
         };
+        
         NetworkManager.Instance.Room.TrackSubscribed += (track, publication, participant) =>
         {
             if (track.Kind == TrackKind.Audio)
                 track.Attach();
         };
+        
         NetworkManager.Instance.Room.TrackUnsubscribed += (track, publication, participant) =>
         {
             if (track.Kind == TrackKind.Audio)
                 track.Detach();
         };
+        
+        NetworkManager.Instance.PacketReceived += PacketReceived;
         Debug.Log($"LocalParticipant SID: {NetworkManager.Instance.Room.LocalParticipant.Sid}");
+
+        for (var i = 0; i < 20; i++)
+        {
+            yield return NetworkManager.Instance.SendPacket(new PaddingPacket(), DataPacketKind.RELIABLE);
+            yield return new WaitForSeconds(0.75f / 20f);
+        }
         
         Debug.Log("Sending Ready");
         yield return NetworkManager.Instance.SendPacket(new ReadyPacket(), DataPacketKind.RELIABLE);

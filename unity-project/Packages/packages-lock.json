@@ -1,14 +1,14 @@
 {
   "dependencies": {
     "be.feeps.twirpunity": {
-      "version": "https://github.com/ifl-studio/twirp-client-unity.git?path=twirp-package",
+      "version": "https://github.com/theomonnom/twirp-client-unity.git?path=twirp-package",
       "depth": 0,
       "source": "git",
       "dependencies": {},
       "hash": "8910ff1d083996cc7d53719eafec96f86678871f"
     },
     "com.unity.collab-proxy": {
-      "version": "1.15.15",
+      "version": "1.15.16",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -49,7 +49,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.nuget.newtonsoft-json": {
-      "version": "2.0.0",
+      "version": "3.0.2",
       "depth": 1,
       "source": "registry",
       "dependencies": {},
@@ -82,11 +82,13 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.services.core": {
-      "version": "1.0.1",
+      "version": "1.3.1",
       "depth": 1,
       "source": "registry",
       "dependencies": {
-        "com.unity.modules.unitywebrequest": "1.0.0"
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.0.2",
+        "com.unity.modules.androidjni": "1.0.0"
       },
       "url": "https://packages.unity.com"
     },
@@ -151,12 +153,13 @@
       "url": "https://packages.unity.com"
     },
     "io.livekit.unity": {
-      "version": "file:/Users/theomonnom/Desktop/client-sdk-unity-web",
+      "version": "https://github.com/livekit/client-sdk-unity-web.git",
       "depth": 0,
-      "source": "local",
+      "source": "git",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "2.0.0"
-      }
+      },
+      "hash": "d51cc2842cfac1a5b5f2575ee4be103ee6e07c49"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

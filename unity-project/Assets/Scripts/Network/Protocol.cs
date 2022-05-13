@@ -23,6 +23,7 @@ public class Protocol
         RegisterPacket(MovePacket.Id, typeof(MovePacket));
         RegisterPacket(DamagePacket.Id, typeof(DamagePacket));
         RegisterPacket(DeathPacket.Id, typeof(DeathPacket));
+        RegisterPacket(PaddingPacket.Id, typeof(PaddingPacket));
         RegisterPacket(ShootingPacket.Id, typeof(ShootingPacket));
         RegisterPacket(AnimationPacket.Id, typeof(AnimationPacket));
     }
@@ -33,6 +34,12 @@ public interface IPacket
     // In reality, this isn't required for blittable structs but needed for more complex structs ( Containing strings ... ) + endianness
     void Serialize(PacketWriter writer) { }
     void Deserialize(PacketReader reader) { }
+}
+
+// TODO Remove
+public struct PaddingPacket : IPacket
+{
+    public const ushort Id = 999;
 }
 
 public struct ReadyPacket : IPacket
