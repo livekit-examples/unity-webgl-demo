@@ -56,7 +56,7 @@ body {
 #unity-logo {
     width: 154px;
     height: 130px;
-    background: url('unity-logo-dark.png') no-repeat center
+    background: url('unity-logo-{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}.png') no-repeat center
 }
 
 #unity-progress-bar-empty {
@@ -64,14 +64,14 @@ body {
     height: 18px;
     margin-top: 10px;
     margin-left: 6.5px;
-    background: url('progress-bar-empty-dark.png') no-repeat center
+    background: url('progress-bar-empty-{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}.png') no-repeat center
 }
 
 #unity-progress-bar-full {
     width: 0%;
     height: 18px;
     margin-top: 10px;
-    background: url('progress-bar-full-dark.png') no-repeat center
+    background: url('progress-bar-full-{{{ SPLASH_SCREEN_STYLE.toLowerCase() }}}.png') no-repeat center
 }
 
 #unity-footer {

@@ -66,18 +66,29 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/unity.loader.js";
+      var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
       var config = {
-        dataUrl: buildUrl + "/e80da3bd16c584055194bbcf375355b6.data.br",
-        frameworkUrl: buildUrl + "/7394c3fb514436dd64cfd88bd8d32c8f.js.br",
-        codeUrl: buildUrl + "/c987af2f3a03cd01f5c951b0e3e8632d.wasm.br",
+        dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+        frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_WASM
+        codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#endif
+#if MEMORY_FILENAME
+        memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+        symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
         streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "LiveKitDemo",
-        productVersion: "0.1",
+        companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+        productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+        productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
         showBanner: unityShowBanner,
       };
 
+#if BACKGROUND_FILENAME
+      canvas.style.background = "url('" + buildUrl + "/{{{ BACKGROUND_FILENAME.replace(/'/g, '%27') }}}') center / cover";
+#endif
       loadingBar.style.display = "block";
 
       var script = document.createElement("script");
