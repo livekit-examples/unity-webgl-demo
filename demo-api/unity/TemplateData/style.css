@@ -57,7 +57,7 @@ body {
 #unity-canvas {
     background: #141414;
     width: 100%;
-    height: 496px;
+    min-height: 496px;
 }
 
 #unity-loading-bar {
