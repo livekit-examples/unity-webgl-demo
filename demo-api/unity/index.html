@@ -10,8 +10,11 @@
   <body>
     <div id="unity-container">
       <div id="header">
-        <img id="lklogo" src="TemplateData/livekit.svg" />
-        <div id="unity-fullscreen-button"></div>
+        <div>
+          <img id="lklogo" src="TemplateData/livekit.svg" />
+          <span>FOR UNITY</span>
+        </div>
+        <div id="unity-fullscreen-button"><span>FULLSCREEN<img src="TemplateData/maximize.svg"/></span></div>
       </div>
 
       <canvas id="unity-canvas"></canvas>
@@ -23,8 +26,8 @@
       </div>
       <div id="unity-warning"> </div>
       <div id="unity-footer">
-        <span id="buildmsg">Built with LiveKit Unity SDK</span>
-        <a id="githublink" href="https://github.com/livekit/client-unity-demo" target="_blank"> 
+        <a id="githublink" href="https://github.com/livekit/client-unity-demo" target="_blank">
+          <span>Built with LiveKit Unity SDK</span>
           <img src="TemplateData/github-icon.svg"/>
         </a>
       </div>
@@ -68,9 +71,9 @@
       var buildUrl = "Build";
       var loaderUrl = buildUrl + "/unity.loader.js";
       var config = {
-        dataUrl: buildUrl + "/e80da3bd16c584055194bbcf375355b6.data.br",
-        frameworkUrl: buildUrl + "/7394c3fb514436dd64cfd88bd8d32c8f.js.br",
-        codeUrl: buildUrl + "/c987af2f3a03cd01f5c951b0e3e8632d.wasm.br",
+        dataUrl: buildUrl + "/248a11614072c5b9d849f38f4f267e8e.data.br",
+        frameworkUrl: buildUrl + "/cda416d2309e2351e2277a167fad558a.js.br",
+        codeUrl: buildUrl + "/d05cd7346a5ee24d39ca0de02190e6b5.wasm.br",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "LiveKitDemo",

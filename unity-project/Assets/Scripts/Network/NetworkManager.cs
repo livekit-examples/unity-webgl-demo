@@ -94,7 +94,7 @@ public class NetworkManager : MonoBehaviour
             Debug.Log("Received a packet coming from the Server API ? ( Ignoring ..) ");
             return;
         }
-
+        
         var packet = m_PacketReader.UnserializePacket(data);
         if (packet == null)
         {

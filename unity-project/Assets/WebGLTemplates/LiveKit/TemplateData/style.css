@@ -1,3 +1,13 @@
+@font-face {
+    font-family: 'EverettMono';
+    src:  url('everett-mono-regular.woff2') format('woff2')
+}
+
+@font-face {
+    font-family: 'VG5000';
+    src:  url('vg5000-regular.woff2') format('woff2')
+}
+
 body {
     padding: 0;
     margin: 0;
@@ -10,13 +20,6 @@ body {
     height: 100vh;
 }
 
-#buildmsg{
-    font-family: arial, sans-serif;
-    font-size: 16px;
-    line-height: 3rem;
-    vertical-align: middle;
-}
-
 #header{
     display: flex;
     justify-content: space-between;
@@ -24,25 +27,37 @@ body {
 }
 
 #lklogo{
-    margin: 16px 0;
+    display: inline-block;
+    width: 87px;
+    height: 20px;
+}
+
+#lklogo + span {
+    font-family: 'VG5000', sans-serif;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 400;
 }
 
 #githublink img{
-    width: 24px;
-    height: 24px;
+    width: 19px;
+    height: 18px;
     vertical-align: middle;
 }
 
 #unity-container {
     display: flex;
     flex-direction: column;
+    justify-content: space-evenly;
     margin: 0 auto;
-    width: 75vw;
+    height: 100vh;
+    width: 61vw;
 }
 
 #unity-canvas {
     background: #141414;
     width: 100%;
+    height: 496px;
 }
 
 #unity-loading-bar {
@@ -75,15 +90,40 @@ body {
 }
 
 #unity-footer {
-    position: relative
+    text-align: center;
+    font-size: 11px;
+    opacity: 0.6;
+}
+
+#unity-footer a {
+    font-family: 'EverettMono', sans-serif;
+    text-decoration: none;
+    color: #fff;
+}
+#unity-footer a > span{
+    vertical-align: middle;
 }
 
 #unity-fullscreen-button {
-    width: 38px;
-    height: 38px;
+    cursor: pointer;
     vertical-align: middle;
-    border-radius: 100%;
-    background: url('fullscreen-button.png') no-repeat center
+    color: #FF6D5D;
+    width: 138px;
+    height: 33px;
+    line-height: 33px;
+    border: 1px solid #FF6D5D;
+}
+
+#unity-fullscreen-button > span{
+    display: flex;
+    justify-content: space-between;
+    vertical-align: middle;
+    font-family: 'EverettMono', sans-serif;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0 16px;
+    font-size: 11px;
+    font-weight: 500;
 }
 
 #unity-warning {
@@ -95,3 +135,18 @@ body {
     padding: 10px;
     display: none
 }
+
+
+@media only screen and (max-width: 1100px) {
+    #unity-container{
+        width: 90vw;
+    }
+}
+
+
+@media only screen and (max-width: 768px) {
+    #unity-container{
+        width: 100vw;
+    }
+}
+
