@@ -77,7 +77,9 @@ public class Player : MonoBehaviour
             Projection.SetBackfaceOpacity(0.2f);
             StartCoroutine(NetworkPosition());
 
-            NetworkManager.Instance.Room.LocalParticipant.SetCameraEnabled(true);
+            if(JoinHandler.SelectedCamera != null)
+                NetworkManager.Instance.Room.LocalParticipant.PublishTrack(JoinHandler.SelectedCamera);
+            
             NetworkManager.Instance.Room.LocalParticipant.SetMicrophoneEnabled(true);
         }
         
@@ -102,7 +104,9 @@ public class Player : MonoBehaviour
     {
         if (IsLocalPlayer)
         {
-            NetworkManager.Instance.Room.LocalParticipant.SetCameraEnabled(false);
+            if(JoinHandler.SelectedCamera != null)
+                NetworkManager.Instance.Room.LocalParticipant.UnpublishTrack(JoinHandler.SelectedCamera);
+            
             NetworkManager.Instance.Room.LocalParticipant.SetMicrophoneEnabled(false);
             LocalPlayer = null;
         }
