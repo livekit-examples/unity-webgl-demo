@@ -55,9 +55,15 @@ func (s *UnityAPI) Start() error {
 		// Support Brotli compression & wasm streaming
 		filename := filepath.Base(r.URL.Path)
 		exts := strings.Split(filename, ".")
+		headers := rw.Header()
+
+		if filename == "unity.loader.js" {
+			headers.Set("Cache-Control", "no-cache, no-store, must-revalidate")
+			headers.Set("Pragma", "no-cache")
+			headers.Set("Expires", "0")
+		}
 
 		if strings.Contains(r.Header.Get("Accept-Encoding"), "br") && len(exts) >= 1 {
-			headers := rw.Header()
 
 			if exts[len(exts)-1] == "br" {
 				headers.Set("Content-Encoding", "br")
