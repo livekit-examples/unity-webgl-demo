@@ -57,7 +57,7 @@ func (s *UnityAPI) Start() error {
 		exts := strings.Split(filename, ".")
 		headers := rw.Header()
 
-		if filename == "unity.loader.js" {
+		if filename == "unity.loader.js" || filename == "index.html" {
 			headers.Set("Cache-Control", "no-cache, no-store, must-revalidate")
 			headers.Set("Pragma", "no-cache")
 			headers.Set("Expires", "0")
