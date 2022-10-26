@@ -1,8 +1,6 @@
-using System.Collections;
 using LiveKit;
 using Twirp;
 using UnityEngine;
-using UnityProtocol;
 
 public class NetworkManager : MonoBehaviour
 {
@@ -11,11 +9,8 @@ public class NetworkManager : MonoBehaviour
     public delegate void PacketReceivedDelegate(RemoteParticipant participant, IPacket packet, DataPacketKind kind);
     public event PacketReceivedDelegate PacketReceived;
 
-    public delegate void ConnectedDelegate(Room room);
-    public event ConnectedDelegate Connected;
-    
-    public delegate void ConnectionFailedDelegate();
-    public event ConnectionFailedDelegate ConnectionFailed;
+    public delegate void RoomCreatedDelegate(Room room);
+    public event RoomCreatedDelegate RoomCreated;
     
     public string ServiceURL = "http://localhost:8080";
     public string LiveKitURL = "ws://localhost:7880";
@@ -23,7 +18,6 @@ public class NetworkManager : MonoBehaviour
     public Room Room { get; private set; }
     public UnityServiceClient UnityService { get; private set; }
 
-    private bool m_Connecting;
     private PacketReader m_PacketReader;
     private PacketWriter m_PacketWriter;
 
@@ -41,50 +35,16 @@ public class NetworkManager : MonoBehaviour
         UnityService = new UnityServiceClient(this, ServiceURL, 5);
     }
 
-    public IEnumerator StartNetwork(string room, string username)
+    public ConnectOperation StartNetwork(string token)
     {
-        if (m_Connecting)
-            yield break;
-
-        m_Connecting = true;
-        var req = new JoinTokenRequest
-        {
-            ParticipantName = username,
-            RoomName = room
-        };
-
-        var tokenOp = UnityService.RequestJoinToken(req);
-        yield return tokenOp;
-
-        if (tokenOp.IsError)
-        {
-            Debug.LogError("An error occurred while getting a join token");
-            m_Connecting = false;
-            ConnectionFailed?.Invoke();
-            yield break;
-        }
-        
         Room = new Room();
+        RoomCreated?.Invoke(Room);
+        
         m_PacketReader = new PacketReader();
         m_PacketWriter = new PacketWriter();
-        
         Room.DataReceived += DataReceived;
         
-        var joinOp = Room.Connect(LiveKitURL, tokenOp.Resp.JoinToken);
-        yield return joinOp;
-
-        if (joinOp.IsError)
-        {
-            Debug.LogError("An error occurred while joining the room");
-            m_Connecting = false;
-            ConnectionFailed?.Invoke();
-            yield break;
-        }
-        
-        Debug.Log("Connected to the Room");
-        
-        Connected?.Invoke(Room);
-        m_Connecting = false;
+        return Room.Connect(LiveKitURL, token);
     }
 
     private void DataReceived(byte[] data, RemoteParticipant participant, DataPacketKind? kind)

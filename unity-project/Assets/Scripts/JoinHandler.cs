@@ -11,6 +11,8 @@ public class JoinHandler : MonoBehaviour
 {
     public static Color SelectedColor { get; private set; }
     public static LocalVideoTrack SelectedCamera { get; private set; }
+    public static string RoomName { get; private set; }
+    public static string Username { get; private set; }
     
     public Button JoinButton;
     public RawImage CameraPreview;
@@ -42,23 +44,17 @@ public class JoinHandler : MonoBehaviour
         
         JoinButton.onClick.AddListener(() =>
         {
-            var room = RoomInput.text.Trim();
-            var username = NameInput.text.Trim();
+            RoomName = RoomInput.text.Trim();
+            Username = NameInput.text.Trim();
 
-            if (username.Length == 0)
+            if (Username.Length == 0)
                 return;
 
-            if (room.Length == 0)
+            if (RoomName.Length == 0)
                 return;
 
-            StartCoroutine(NetworkManager.Instance.StartNetwork(room, username));
-        });
-
-        NetworkManager.Instance.Connected += room =>
-        {
-            Debug.Log("Connected to the room, changing scene...");
             SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
-        };
+        });
 
         Projection.UpdateTrack(null);
         StartCoroutine(StartPreviewCamera());

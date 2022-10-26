@@ -3,7 +3,12 @@ using System.Collections.Generic;
 using LiveKit;
 using UnityEngine;
 using UnityEngine.Rendering.PostProcessing;
+using UnityProtocol;
 using Random = UnityEngine.Random;
+using LiveKit;
+using Twirp;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -35,32 +40,62 @@ public class GameManager : MonoBehaviour
 
     IEnumerator Start()
     {
-        NetworkManager.Instance.Room.ParticipantConnected += participant =>
+        NetworkManager.Instance.RoomCreated += room =>
         {
-            Debug.Log($"Participant connected : {participant.Sid}");
-        };
-        
-        NetworkManager.Instance.Room.ParticipantDisconnected += participant =>
-        {
-            if (Player.Players.TryGetValue(participant.Sid, out var player))
-                Destroy(player.gameObject);
-        };
-        
-        NetworkManager.Instance.Room.TrackSubscribed += (track, publication, participant) =>
-        {
-            if (track.Kind == TrackKind.Audio)
-                track.Attach();
-        };
-        
-        NetworkManager.Instance.Room.TrackUnsubscribed += (track, publication, participant) =>
-        {
-            if (track.Kind == TrackKind.Audio)
-                track.Detach();
+            // Register callbacks directly before connecting to the room
+            room.ParticipantConnected += participant =>
+            {
+                Debug.Log($"Participant connected : {participant.Sid}");
+            };
+
+            room.ParticipantDisconnected += participant =>
+            {
+                if (Player.Players.TryGetValue(participant.Sid, out var player))
+                    Destroy(player.gameObject);
+            };
+
+            room.TrackSubscribed += (track, publication, participant) =>
+            {
+                if (track.Kind == TrackKind.Audio)
+                    track.Attach();
+            };
+
+            room.TrackUnsubscribed += (track, publication, participant) =>
+            {
+                if (track.Kind == TrackKind.Audio)
+                    track.Detach();
+            };
         };
         
         NetworkManager.Instance.PacketReceived += PacketReceived;
-        Debug.Log($"LocalParticipant SID: {NetworkManager.Instance.Room.LocalParticipant.Sid}");
+        
+        var req = new JoinTokenRequest
+        {
+            ParticipantName = JoinHandler.Username,
+            RoomName = JoinHandler.RoomName
+        };
 
+        var tokenOp = NetworkManager.Instance.UnityService.RequestJoinToken(req);
+        yield return tokenOp;
+
+        if (tokenOp.IsError)
+        {
+            Debug.LogError("An error occurred while getting a join token");
+            ExitGame();
+            yield break;
+        }
+
+        var conn = NetworkManager.Instance.StartNetwork(tokenOp.Resp.JoinToken);
+        yield return conn;
+
+        if (conn.IsError)
+        {
+            Debug.LogError("Failed to connect to the Room");
+            ExitGame();
+            yield break;
+        }
+        
+        Debug.Log($"LocalParticipant SID: {NetworkManager.Instance.Room.LocalParticipant.Sid}");
         for (var i = 0; i < 20; i++)
         {
             yield return NetworkManager.Instance.SendPacket(new PaddingPacket(), DataPacketKind.RELIABLE);
@@ -72,6 +107,16 @@ public class GameManager : MonoBehaviour
         
         JoinGame();
         UI.UpdateRanking();
+    }
+
+    void ExitGame()
+    {
+        SceneManager.LoadScene("JoinScene", LoadSceneMode.Single);
+    }
+    
+    void OnDestroy()
+    {
+        NetworkManager.Instance.PacketReceived -= PacketReceived;
     }
     
     void PacketReceived(RemoteParticipant participant, IPacket p, DataPacketKind kind)
