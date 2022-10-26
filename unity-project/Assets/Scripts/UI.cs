@@ -14,11 +14,14 @@ public class UI : MonoBehaviour
     public TMP_Text KilledText;
     public TMP_Text KillerText;
 
-    void Start()
+    void Awake()
     {
-        NetworkManager.Instance.Room.LocalParticipant.IsSpeakingChanged += (speaking) =>
+        NetworkManager.Instance.RoomCreated += room =>
         {
-            MicroImage.gameObject.SetActive(speaking);
+            room.LocalParticipant.IsSpeakingChanged += (speaking) =>
+            {
+                MicroImage.gameObject.SetActive(speaking);
+            };
         };
     }
 
