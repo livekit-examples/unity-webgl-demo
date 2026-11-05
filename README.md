@@ -1,3 +1,6 @@
+> [!WARNING]
+> This example is archived and no longer maintained. For current examples, see [unity-example](https://github.com/livekit-examples/unity-example).
+
 # LiveKit Unity Demo
 This demo use our [LiveKit Unity SDK](https://github.com/livekit/client-sdk-unity-web)
 
